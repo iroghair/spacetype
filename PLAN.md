@@ -204,11 +204,11 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 
 ### Phase 3 — Levels, scoring & menus
 
-- [ ] Content pipeline (`npm run content`) and starter word/sentence lists
-- [ ] `levels.json` for levels 1–15; level runner with the drill → mix → words sequence
-- [ ] Score, combo tiers, SPM meter, accuracy, flawless-word bonus
-- [ ] Level select screen (all levels open) and results screen with stars and most-confused keys
-- [ ] Personal bests per level in localStorage
+- [x] Content pipeline (`npm run content`) and starter word/sentence lists
+- [x] `levels.json` for levels 1–15; level runner with the drill → mix → words sequence
+- [x] Score, combo tiers, SPM meter, accuracy, flawless-word bonus
+- [x] Level select screen (all levels open) and results screen with stars and most-confused keys
+- [x] Personal bests per level in localStorage
 
 **Done when:** every level is playable from the menu and results are saved.
 
@@ -254,3 +254,7 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 
 - Tuning of speeds, SPM targets and combo tiers after the first playtests
 - **How forgiving the stream is:** the next letter waits about 10 slots from the laser (`stream.comfortSlots`), i.e. 20 s at 30 SPM or 7 s at 90 SPM before it burns. Tune in playtests.
+- **Stars:** 3 stars = at least 95% accuracy and on target SPM; 2 stars = 85% and 75% of target; otherwise 1 (`scoring.stars` in `src/config.ts`).
+- **Flawless-word bonus:** 20 points × multiplier for every word (2+ letters) typed without a mistake.
+- **Personal record:** "Nieuw record!" shows when score or SPM beats an earlier result of the same level (not on the very first play).
+- **Level 12–15 content:** level 12 mixes capitalised words with short sentences; 13 uses sentences with ? ! : -; 14 short sentences (≤ 30 characters); 15 long sentences (31+). Tune in `content/nl/levels.json`.
