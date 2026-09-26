@@ -1,0 +1,12 @@
+{
+  "hud.score": "Score",
+  "start.title": "SpaceType",
+  "start.level": "Level 1: home row f j",
+  "start.prompt": "Press Enter to start",
+  "start.hint": "Put your index fingers on f and j.",
+  "complete.title": "Level complete!",
+  "complete.score": "Score: {score}",
+  "complete.prompt": "Press Enter to play again",
+  "warning.capsLock": "Caps Lock is on!",
+  "warning.keyboardNeeded": "SpaceType needs a keyboard. Play on a laptop or computer."
+}

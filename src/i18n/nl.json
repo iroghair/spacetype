@@ -1,0 +1,12 @@
+{
+  "hud.score": "Punten",
+  "start.title": "SpaceType",
+  "start.level": "Level 1: thuisrij f j",
+  "start.prompt": "Druk op Enter om te beginnen",
+  "start.hint": "Leg je wijsvingers op de f en de j.",
+  "complete.title": "Level klaar!",
+  "complete.score": "Punten: {score}",
+  "complete.prompt": "Druk op Enter om opnieuw te spelen",
+  "warning.capsLock": "Caps Lock staat aan!",
+  "warning.keyboardNeeded": "Voor SpaceType heb je een toetsenbord nodig. Speel op een laptop of computer."
+}
