@@ -253,6 +253,4 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 ## 9. Open decisions
 
 - Tuning of speeds, SPM targets and combo tiers after the first playtests
-- **Font licence:** Atkinson Hyperlegible Mono is SIL Open Font License (free to use and ship, but not CC0). CLAUDE.md asks for CC0-or-original assets; PLAN.md names this font. Kept for now — confirm, or relax the rule for fonts.
-- **Start/restart key:** Enter (Space is a game key, so it could restart by accident).
 - **How forgiving the stream is:** the next letter waits about 10 slots from the laser (`stream.comfortSlots`), i.e. 20 s at 30 SPM or 7 s at 90 SPM before it burns. Tune in playtests.
