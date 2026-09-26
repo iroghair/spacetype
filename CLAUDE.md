@@ -51,7 +51,7 @@ npm run content     # validate + sort content into public/content/
 - No analytics, trackers, ads, accounts or external requests at runtime.
 - All text shown to kids comes from reviewed files in `content/`.
 - The repo is public, so never commit secrets. `.env` is git-ignored.
-- Assets must be CC0 or original work. Record the source and licence of every asset in `CREDITS.md`. No trademarked characters, logos or sprites (e.g. nothing taken from Minecraft).
+- Assets must be CC0 or original work. Exception: fonts may use an open licence (e.g. SIL Open Font License) that allows free use in a non-commercial game; ship the licence file with the font. Record the source and licence of every asset in `CREDITS.md`. No trademarked characters, logos or sprites (e.g. nothing taken from Minecraft).
 
 ## Verification
 

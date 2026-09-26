@@ -4,10 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SpaceType</title>
-    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <div id="game"></div>
+    <!-- A fixed 1280×720 stage, scaled to fit the window by src/ui/stage.ts. -->
+    <div id="stage">
+      <div id="hud"></div>
+      <div id="panel"></div>
+      <div id="field"></div>
+      <div id="guide"></div>
+      <div id="caps-warning" hidden></div>
+      <div id="overlay" hidden></div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

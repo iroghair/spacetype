@@ -192,13 +192,13 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 
 ### Phase 2 — Core loop
 
-- [ ] Engine: character stream, cursor, stroke handling per rules 1–5, miss detection, per-character state including the typed key for wrong strokes; unit tests for every rule
-- [ ] Input module (see keyboard gotchas in CLAUDE.md)
-- [ ] Flying letters rendered from engine state; laser burns misses (simple placeholder effect)
-- [ ] Three-line text panel: active-letter arrow, green/red colouring, wrong keys shown above (see 2. Text panel details)
-- [ ] Arrow under the next flying letter in the play field
-- [ ] Hard-coded test content for level 1
-- [ ] Playwright smoke test: load, start, type correct keys (score changes), type one wrong key (red letter with the typed key above it)
+- [x] Engine: character stream, cursor, stroke handling per rules 1–5, miss detection, per-character state including the typed key for wrong strokes; unit tests for every rule
+- [x] Input module (see keyboard gotchas in CLAUDE.md)
+- [x] Flying letters rendered from engine state; laser burns misses (simple placeholder effect)
+- [x] Three-line text panel: active-letter arrow, green/red colouring, wrong keys shown above (see 2. Text panel details)
+- [x] Arrow under the next flying letter in the play field
+- [x] Hard-coded test content for level 1
+- [x] Playwright smoke test: load, start, type correct keys (score changes), type one wrong key (red letter with the typed key above it)
 
 **Done when:** a child can play a level-1 run from start to finish, with placeholder effects.
 
@@ -253,3 +253,4 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 ## 9. Open decisions
 
 - Tuning of speeds, SPM targets and combo tiers after the first playtests
+- **How forgiving the stream is:** the next letter waits about 10 slots from the laser (`stream.comfortSlots`), i.e. 20 s at 30 SPM or 7 s at 90 SPM before it burns. Tune in playtests.
