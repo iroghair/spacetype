@@ -1,12 +1,198 @@
+/* Colours, sizes and fonts come from src/config.ts as CSS variables (--name),
+   set at startup by src/ui/theme.ts. */
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Mono";
+  src: url("./assets/fonts/atkinson-hyperlegible-mono-latin-400-normal.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Mono";
+  src: url("./assets/fonts/atkinson-hyperlegible-mono-latin-700-normal.woff2")
+    format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
 html,
 body {
   margin: 0;
   height: 100%;
-  background: #05060f;
   overflow: hidden;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family), monospace;
 }
 
-#game {
-  width: 100vw;
-  height: 100vh;
+#stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--stage-width);
+  height: var(--stage-height);
+  transform-origin: center;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- HUD ---------- */
+
+#hud {
+  height: var(--hud-height);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 40px;
+  font-size: 24px;
+  color: var(--color-text-dim);
+}
+
+#hud .value {
+  color: var(--color-text);
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+/* ---------- Text panel ---------- */
+
+#panel {
+  height: var(--panel-height);
+  box-sizing: border-box;
+  padding: 8px 40px;
+  background: var(--color-panel-background);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.line {
+  position: relative;
+  display: flex;
+  font-size: var(--panel-size);
+}
+
+.line.typed,
+.line.next {
+  color: var(--color-text-dim);
+}
+
+/* Every line reserves room for arrow and marks, so nothing shifts when they appear. */
+.line.current {
+  padding-bottom: calc(var(--mark-size) * 1.1);
+}
+
+/* One character: a small mark on top, the letter below. */
+.ch {
+  width: 1ch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: pre;
+}
+
+.ch .mark {
+  height: calc(var(--mark-size) * 1.2);
+  line-height: calc(var(--mark-size) * 1.2);
+  font-size: var(--mark-size);
+  font-weight: 700;
+  color: var(--color-wrong);
+}
+
+.ch .glyph {
+  line-height: 1.2;
+}
+
+.ch.correct .glyph {
+  color: var(--color-correct);
+}
+
+.ch.wrong .glyph,
+.ch.missed .glyph {
+  color: var(--color-wrong);
+}
+
+.arrow {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1ch;
+  text-align: center;
+  font-size: var(--mark-size);
+  line-height: calc(var(--mark-size) * 1.1);
+  color: var(--color-arrow);
+  transition: transform var(--arrow-slide-ms) ease-out;
+}
+
+/* ---------- Play field and finger guide ---------- */
+
+#field {
+  height: var(--field-height);
+  line-height: 0; /* no gap under the canvas */
+}
+
+#guide {
+  flex: 1;
+}
+
+/* ---------- Messages ---------- */
+
+#caps-warning {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--hud-height) + var(--panel-height) + 12px);
+  transform: translateX(-50%);
+  padding: 6px 18px;
+  border-radius: 8px;
+  background: var(--color-wrong);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 6, 15, 0.7);
+}
+
+#overlay .box {
+  min-width: 560px;
+  padding: 32px 48px;
+  border-radius: 16px;
+  background: var(--color-panel-background);
+  border: 2px solid var(--color-arrow);
+  text-align: center;
+  font-size: 26px;
+}
+
+#overlay h1 {
+  margin: 0 0 16px;
+  font-size: 48px;
+  color: var(--color-arrow);
+}
+
+#overlay p {
+  margin: 10px 0;
+}
+
+#overlay .prompt {
+  margin-top: 24px;
+  font-weight: 700;
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+[hidden] {
+  display: none !important;
 }
