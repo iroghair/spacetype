@@ -100,24 +100,24 @@ Letters, words or sentences fly from right to left through space. A vertical las
 
 Draft progression; tune after playtesting. Each level adds keys. Within a level the run goes: **new-key drill → mixed drill of all learned keys → real words using only learned keys** (once enough such words exist).
 
-| #   | Name (UI, NL)          | New keys        | Target SPM (start value) |
-|-----|------------------------|-----------------|--------------------------|
-| 1   | Thuisrij: f j          | f j space       | 30 |
-| 2   | Thuisrij: d k          | d k             | 35 |
-| 3   | Thuisrij: a s l        | a s l           | 40 |
-| 4   | Thuisrij compleet      | g h             | 45 |
-| 5   | Bovenrij: e i          | e i             | 50 |
-| 6   | Bovenrij: r u          | r u             | 55 |
-| 7   | De n en de t           | n t             | 60 |
-| 8   | Bovenrij: w o          | w o             | 60 |
-| 9   | Onderrij: v b m        | v b m           | 65 |
-| 10  | Onderrij: c , .        | c , .           | 70 |
-| 11  | Laatste letters        | p z y q x       | 70 |
-| 12  | Hoofdletters           | Shift           | 70 |
-| 13  | Leestekens             | ? ! : -         | 75 |
-| 14  | Korte zinnen           | —               | 80 |
-| 15  | Lange zinnen           | —               | 90 |
-| 16+ | Onderwerpen (phase 6)  | —               | 90+ |
+| #   | Name (UI, NL)         | New keys  | Target SPM (start value) |
+| --- | --------------------- | --------- | ------------------------ |
+| 1   | Thuisrij: f j         | f j space | 30                       |
+| 2   | Thuisrij: d k         | d k       | 35                       |
+| 3   | Thuisrij: a s l       | a s l     | 40                       |
+| 4   | Thuisrij compleet     | g h       | 45                       |
+| 5   | Bovenrij: e i         | e i       | 50                       |
+| 6   | Bovenrij: r u         | r u       | 55                       |
+| 7   | De n en de t          | n t       | 60                       |
+| 8   | Bovenrij: w o         | w o       | 60                       |
+| 9   | Onderrij: v b m       | v b m     | 65                       |
+| 10  | Onderrij: c , .       | c , .     | 70                       |
+| 11  | Laatste letters       | p z y q x | 70                       |
+| 12  | Hoofdletters          | Shift     | 70                       |
+| 13  | Leestekens            | ? ! : -   | 75                       |
+| 14  | Korte zinnen          | —         | 80                       |
+| 15  | Lange zinnen          | —         | 90                       |
+| 16+ | Onderwerpen (phase 6) | —         | 90+                      |
 
 **Excluded characters (for now):** words and sentences containing diacritics (ë, é, ï, ö) or apostrophes/quotes (auto's, zo'n). On the US-International layout these are dead keys and behave unexpectedly. This could become a setting later.
 
@@ -139,16 +139,16 @@ content/nl/
 
 ## 6. Tech stack
 
-| Part | Choice |
-|---|---|
-| Language & build | TypeScript + Vite (static build) |
-| Play field | Phaser (latest stable): starfield, flying letters, laser, particles, tweens |
-| HUD, text panel, menus, finger guide | Plain HTML/CSS overlay; SVG for keyboard and hands |
-| Big celebrations | canvas-confetti |
-| Sound | Phaser sound (Web Audio); CC0 effects from Kenney.nl or generated with jsfxr |
-| Tests | Vitest (unit), Playwright (smoke test + screenshots for visual checks) |
-| Hosting | GitHub Actions → GitHub Pages |
-| Saved data | localStorage for settings and personal bests (per device; each child uses their own device, so this doubles as a simple per-child record) |
+| Part                                 | Choice                                                                                                                                    |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Language & build                     | TypeScript + Vite (static build)                                                                                                          |
+| Play field                           | Phaser (latest stable): starfield, flying letters, laser, particles, tweens                                                               |
+| HUD, text panel, menus, finger guide | Plain HTML/CSS overlay; SVG for keyboard and hands                                                                                        |
+| Big celebrations                     | canvas-confetti                                                                                                                           |
+| Sound                                | Phaser sound (Web Audio); CC0 effects from Kenney.nl or generated with jsfxr                                                              |
+| Tests                                | Vitest (unit), Playwright (smoke test + screenshots for visual checks)                                                                    |
+| Hosting                              | GitHub Actions → GitHub Pages                                                                                                             |
+| Saved data                           | localStorage for settings and personal bests (per device; each child uses their own device, so this doubles as a simple per-child record) |
 
 ---
 
@@ -182,11 +182,11 @@ Each phase gets its own branch and PR. CI must be green, the PR is merged to `ma
 
 The owner does this first: create a **public** GitHub repo named `spacetype`, then go to Settings → Pages → Source and select **GitHub Actions**.
 
-- [ ] Vite + TypeScript + Phaser project (Phaser's official Vite/TS template is a fine start); Vitest configured
-- [ ] Scripts: `dev`, `build`, `test`, `typecheck`, `content`
-- [ ] Vite `base` read from an env var; the workflow sets it to `/spacetype/` (local dev uses `/`)
-- [ ] Workflow: on PR → typecheck, test, build; on push to `main` → same, then deploy to Pages
-- [ ] Placeholder Play scene: dark space, drifting starfield, laser line
+- [x] Vite + TypeScript + Phaser project (Phaser's official Vite/TS template is a fine start); Vitest configured
+- [x] Scripts: `dev`, `build`, `test`, `typecheck`, `content`
+- [x] Vite `base` read from an env var; the workflow sets it to `/spacetype/` (local dev uses `/`)
+- [x] Workflow: on PR → typecheck, test, build; on push to `main` → same, then deploy to Pages
+- [x] Placeholder Play scene: dark space, drifting starfield, laser line
 
 **Done when:** `https://<github-user>.github.io/spacetype/` shows the starfield and laser.
 
@@ -233,7 +233,7 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 
 ### Phase 6 — Topic texts
 
-- [ ] `scripts/generate_topic_texts.py`: a Python script the owner runs locally. The API key is read from `.env`, which is git-ignored. It generates texts for the topics *vissen, muziek, Minecraft, sport, strips* at several difficulty bands, with these constraints: ages 9–13, Dutch, no diacritics or apostrophes, kid-safe, original text.
+- [ ] `scripts/generate_topic_texts.py`: a Python script the owner runs locally. The API key is read from `.env`, which is git-ignored. It generates texts for the topics _vissen, muziek, Minecraft, sport, strips_ at several difficulty bands, with these constraints: ages 9–13, Dutch, no diacritics or apostrophes, kid-safe, original text.
 - [ ] Output goes to `content/nl/topics/<topic>.pending.txt`. The owner reviews it and moves approved lines to `<topic>.txt`; only approved files are built.
 - [ ] Topic picker (5 options) → a topic run at the chosen difficulty
 - [ ] `TextSource` interface, so a live generator can be added later
