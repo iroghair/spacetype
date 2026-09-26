@@ -1,3 +1,5 @@
+import type { ComboTier } from "./scoring";
+
 // State of one character in the run.
 //   pending: not typed yet
 //   correct: typed correctly
@@ -13,12 +15,18 @@ export interface CharInfo {
 }
 
 export type GameEvent =
-  | { type: "strokeCorrect"; index: number; char: string }
+  | { type: "strokeCorrect"; index: number; char: string; points: number }
   | { type: "strokeWrong"; index: number; expected: string; typed: string }
   /** An untyped letter reached the laser. Counts as a miss. */
   | { type: "letterMissed"; index: number }
   /** A wrongly typed letter reached the laser (visual only; the miss was already counted). */
   | { type: "letterBurned"; index: number }
+  /** The combo reached a new tier (1 = first tier). */
+  | { type: "comboTier"; tier: number; multiplier: number }
+  /** A wrong key or a miss ended a combo of this length. */
+  | { type: "comboBroken"; combo: number }
+  /** Every letter of the word from `start` to `end` (exclusive) was correct. */
+  | { type: "flawlessWord"; start: number; end: number; bonus: number }
   | { type: "levelComplete" };
 
 export interface EngineOptions {
@@ -33,6 +41,22 @@ export interface EngineOptions {
   comfortSlots: number;
   /** How quickly the stream catches up, per second (higher = snappier). */
   catchUpRate: number;
-  /** Points for each correct stroke. */
+  /** Points for each correct stroke, before the combo multiplier. */
   pointsPerStroke: number;
+  comboTiers: readonly ComboTier[];
+  /** Bonus for a word typed without mistakes, before the combo multiplier. */
+  flawlessWordBonus: number;
+}
+
+/** Summary of a finished run, for the results screen. */
+export interface RunStats {
+  score: number;
+  bestCombo: number;
+  correct: number;
+  wrong: number;
+  missed: number;
+  /** 0–1 */
+  accuracy: number;
+  /** Correct strokes per minute over the whole run. */
+  spm: number;
 }

@@ -20,7 +20,7 @@ Create these in phase 1 and keep this list in sync.
 
 ```
 npm install
-npm run dev         # local dev server
+npm run dev         # local dev server (runs `content` first)
 npm run build       # production build (runs `content` first)
 npm run test        # Vitest unit tests
 npm run test:e2e    # Playwright smoke test

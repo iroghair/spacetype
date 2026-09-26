@@ -21,7 +21,8 @@ export const config = {
     correct: 0x5ee07a,
     wrong: 0xff5a5a,
     arrow: 0x4dd9ff,
-    star: 0xc8d0ff,
+    starfield: 0xc8d0ff,
+    star: 0xffd34d, // rating stars on the results screen
     laserCore: 0xffffff,
     laserGlow: 0xff3b5c,
     burn: 0xff8a3b,
@@ -34,9 +35,13 @@ export const config = {
     flyingSize: 44, // letters in the play field
   },
 
-  // Temporary until levels.json arrives in phase 3.
-  testLevel: {
-    targetSpm: 30,
+  // How run texts are built from content/nl/levels.json (see engine/levelRunner.ts).
+  runner: {
+    drillGroup: [2, 4] as [number, number], // letters per drill group
+    mixedGroup: [2, 5] as [number, number], // letters per mixed group
+    minWords: 6, // fewer usable words than this → mixed drill instead
+    focusChance: 0.6, // chance of a word with the level's new keys
+    recentWords: 5, // don't repeat any of the last 5 words
   },
 
   stream: {
@@ -48,6 +53,26 @@ export const config = {
 
   scoring: {
     pointsPerStroke: 10,
+    // Combo length → score multiplier. Reaching a tier is celebrated.
+    comboTiers: [
+      { combo: 10, multiplier: 2 },
+      { combo: 25, multiplier: 3 },
+      { combo: 50, multiplier: 4 },
+      { combo: 100, multiplier: 5 },
+    ],
+    flawlessWordBonus: 20, // per word without mistakes, times the multiplier
+    spmWindowMs: 20_000, // live SPM meter looks at the last 20 seconds
+    spmMinWindowMs: 5_000, // ...but at least 5 s, so the start doesn't spike
+    // Results screen stars (1 star is always given for finishing).
+    stars: {
+      two: { accuracy: 0.85, spmRatio: 0.75 },
+      three: { accuracy: 0.95, spmRatio: 1 },
+    },
+    confusedKeysShown: 3, // most-confused keys listed on the results screen
+  },
+
+  hud: {
+    meterMax: 1.5, // the SPM bar is full at 150% of the level's target
   },
 
   panel: {

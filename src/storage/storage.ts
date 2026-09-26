@@ -1,0 +1,78 @@
+// Saved data: personal bests per level, on this device only (localStorage).
+// The data carries a version number, so a future format change can convert
+// or reset old data instead of crashing on it.
+
+const KEY = "spacetype";
+const VERSION = 1;
+
+export interface LevelBest {
+  score: number;
+  spm: number;
+  accuracy: number;
+  stars: number;
+}
+
+export interface SaveData {
+  version: typeof VERSION;
+  bests: Record<string, LevelBest>;
+}
+
+function empty(): SaveData {
+  return { version: VERSION, bests: {} };
+}
+
+/** The part of the browser's Storage we use (so tests can pass a fake). */
+export type KeyValueStore = Pick<Storage, "getItem" | "setItem">;
+
+export class SaveStore {
+  private data: SaveData;
+
+  constructor(private readonly store: KeyValueStore) {
+    this.data = this.load();
+  }
+
+  best(levelId: number): LevelBest | undefined {
+    return this.data.bests[levelId];
+  }
+
+  /**
+   * Record a finished run. Each field keeps its own best, so a fast-but-sloppy
+   * run can set the SPM record while an earlier run keeps the accuracy record.
+   * Returns the previous best (undefined on the first run of this level).
+   */
+  record(levelId: number, run: LevelBest): LevelBest | undefined {
+    const previous = this.data.bests[levelId];
+    this.data.bests[levelId] = previous
+      ? {
+          score: Math.max(previous.score, run.score),
+          spm: Math.max(previous.spm, run.spm),
+          accuracy: Math.max(previous.accuracy, run.accuracy),
+          stars: Math.max(previous.stars, run.stars),
+        }
+      : { ...run };
+    this.save();
+    return previous;
+  }
+
+  private load(): SaveData {
+    try {
+      const raw = this.store.getItem(KEY);
+      if (!raw) return empty();
+      const parsed = JSON.parse(raw);
+      if (parsed?.version !== VERSION || typeof parsed.bests !== "object")
+        return empty();
+      return parsed as SaveData;
+    } catch {
+      // Storage blocked (private mode) or corrupt data: start fresh.
+      return empty();
+    }
+  }
+
+  private save(): void {
+    try {
+      this.store.setItem(KEY, JSON.stringify(this.data));
+    } catch {
+      // Storage full or blocked: the game still works, bests just aren't kept.
+    }
+  }
+}

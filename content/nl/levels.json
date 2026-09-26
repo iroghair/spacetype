@@ -1,0 +1,174 @@
+[
+  {
+    "id": 1,
+    "name": "Thuisrij: f j",
+    "newKeys": "fj ",
+    "targetSpm": 30,
+    "runLength": 75,
+    "segments": [{ "type": "drill", "share": 1 }]
+  },
+  {
+    "id": 2,
+    "name": "Thuisrij: d k",
+    "newKeys": "dk",
+    "targetSpm": 35,
+    "runLength": 88,
+    "segments": [
+      { "type": "drill", "share": 0.5 },
+      { "type": "mixed", "share": 0.5 }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Thuisrij: a s l",
+    "newKeys": "asl",
+    "targetSpm": 40,
+    "runLength": 100,
+    "segments": [
+      { "type": "drill", "share": 0.3 },
+      { "type": "mixed", "share": 0.3 },
+      { "type": "words", "share": 0.4 }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Thuisrij compleet",
+    "newKeys": "gh",
+    "targetSpm": 45,
+    "runLength": 112,
+    "segments": [
+      { "type": "drill", "share": 0.3 },
+      { "type": "mixed", "share": 0.3 },
+      { "type": "words", "share": 0.4 }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Bovenrij: e i",
+    "newKeys": "ei",
+    "targetSpm": 50,
+    "runLength": 125,
+    "segments": [
+      { "type": "drill", "share": 0.3 },
+      { "type": "mixed", "share": 0.3 },
+      { "type": "words", "share": 0.4 }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Bovenrij: r u",
+    "newKeys": "ru",
+    "targetSpm": 55,
+    "runLength": 138,
+    "segments": [
+      { "type": "drill", "share": 0.3 },
+      { "type": "mixed", "share": 0.3 },
+      { "type": "words", "share": 0.4 }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "De n en de t",
+    "newKeys": "nt",
+    "targetSpm": 60,
+    "runLength": 150,
+    "segments": [
+      { "type": "drill", "share": 0.25 },
+      { "type": "mixed", "share": 0.25 },
+      { "type": "words", "share": 0.5 }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Bovenrij: w o",
+    "newKeys": "wo",
+    "targetSpm": 60,
+    "runLength": 150,
+    "segments": [
+      { "type": "drill", "share": 0.25 },
+      { "type": "mixed", "share": 0.25 },
+      { "type": "words", "share": 0.5 }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Onderrij: v b m",
+    "newKeys": "vbm",
+    "targetSpm": 65,
+    "runLength": 162,
+    "segments": [
+      { "type": "drill", "share": 0.25 },
+      { "type": "mixed", "share": 0.25 },
+      { "type": "words", "share": 0.5 }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Onderrij: c , .",
+    "newKeys": "c,.",
+    "targetSpm": 70,
+    "runLength": 175,
+    "segments": [
+      { "type": "drill", "share": 0.2, "keys": "cd" },
+      { "type": "mixed", "share": 0.2 },
+      {
+        "type": "words",
+        "share": 0.6,
+        "punctuation": ",.",
+        "punctuationChance": 0.25
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Laatste letters",
+    "newKeys": "pzyqx",
+    "targetSpm": 70,
+    "runLength": 175,
+    "segments": [
+      { "type": "drill", "share": 0.25 },
+      { "type": "mixed", "share": 0.25 },
+      {
+        "type": "words",
+        "share": 0.5,
+        "punctuation": ",.",
+        "punctuationChance": 0.15
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Hoofdletters",
+    "newKeys": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "targetSpm": 70,
+    "runLength": 175,
+    "segments": [
+      { "type": "words", "share": 0.5, "capitalize": 0.5 },
+      { "type": "sentences", "share": 0.5, "maxLength": 40 }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Leestekens",
+    "newKeys": "?!:-",
+    "targetSpm": 75,
+    "runLength": 188,
+    "segments": [{ "type": "sentences", "share": 1, "focusNew": true }]
+  },
+  {
+    "id": 14,
+    "name": "Korte zinnen",
+    "newKeys": "",
+    "targetSpm": 80,
+    "runLength": 200,
+    "segments": [{ "type": "sentences", "share": 1, "maxLength": 30 }]
+  },
+  {
+    "id": 15,
+    "name": "Lange zinnen",
+    "newKeys": "",
+    "targetSpm": 90,
+    "runLength": 225,
+    "segments": [{ "type": "sentences", "share": 1, "minLength": 31 }]
+  }
+]

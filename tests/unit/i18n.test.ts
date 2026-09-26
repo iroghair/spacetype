@@ -15,7 +15,7 @@ describe("i18n", () => {
   });
 
   it("fills placeholders", () => {
-    expect(t("complete.score", { score: 120 })).toBe("Punten: 120");
+    expect(t("select.best", { score: 120 })).toBe("Record: 120");
   });
 
   it("switches language", () => {

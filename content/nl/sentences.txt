@@ -1,0 +1,178 @@
+# Zinnen voor SpaceType: één per regel.
+# Toegestaan: letters, spaties en , . ? ! : -  (geen accenten of apostrofs).
+# Regels die met # beginnen worden overgeslagen.
+
+# Korte zinnen
+De kat zit op de mat.
+Ik zie een ster.
+De zon schijnt.
+Wij gaan naar school.
+Het regent vandaag.
+Mijn hond heet Max.
+De vis zwemt in de sloot.
+Ik lees een boek.
+Pak je jas maar.
+De raket vliegt hoog.
+Hoe laat is het?
+Wat eet jij graag?
+Kom je spelen?
+Wat een mooie dag!
+Goed zo, ga door!
+Ik heb een rode fiets.
+Oma bakt een taart.
+Papa kookt soep.
+De juf leest voor.
+We gaan zwemmen.
+Het is koud buiten.
+De maan is rond.
+Ik hou van pizza.
+De baby slaapt.
+Mag ik een appel?
+De bus is te laat.
+Kijk, een vlinder!
+De trein rijdt snel.
+Ik typ met tien vingers.
+Wie wil er ijs?
+De bal is weg.
+Het gras is groen.
+Mijn zus is jarig.
+We eten patat.
+Waar is mijn tas?
+De bloem is geel.
+Ik ben heel blij.
+Tijd om te slapen.
+Doe je jas aan.
+Het sneeuwt!
+De vogel zingt.
+Ik drink een glas melk.
+Wat een grote boom!
+De auto is rood.
+Kun jij fluiten?
+De hond blaft hard.
+Ik zie de zee.
+Het is feest!
+Leuk dat je er bent.
+De klok tikt.
+Ik heb honger.
+Wat ben jij snel!
+De kip legt een ei.
+Mijn kamer is blauw.
+We gaan op reis.
+De taart is op.
+Hup, naar bed!
+Goedemorgen allemaal!
+Tot morgen!
+Pas op: heet!
+Links of rechts?
+De deur is dicht.
+Ik kan al fietsen.
+Vandaag is het zaterdag.
+De sterren twinkelen.
+Het is stil in de klas.
+Ik bel mijn opa.
+Hij heeft een pet op.
+De schildpad is traag.
+Wij winnen de wedstrijd!
+Kijk uit, een plas!
+Een, twee, drie: start!
+Zij tekent een paard.
+Ik vind dit spel leuk.
+Wie is er aan de beurt?
+Dat was knap gedaan!
+Ik zie een ufo!
+Klaar? Af!
+Ja of nee?
+Het licht is groen.
+De uil zit in de boom.
+Mijn fiets is snel.
+Wij lezen een strip.
+De koe eet gras.
+
+# Lange zinnen
+Ik ga met mijn vriend naar het zwembad.
+De astronaut zweeft door het heelal.
+In de zomer eten we vaak een ijsje.
+Mijn broer speelt elke zaterdag voetbal.
+De raket schiet met een flits naar de maan.
+Na school maken we eerst ons huiswerk.
+Onze kat slaapt het liefst op de bank.
+In het bos staan hoge bomen met groene blaadjes.
+Wist je dat een walvis geen vis is?
+Wat wil jij later worden als je groot bent?
+Morgen gaan we met de hele klas naar de dierentuin.
+De ridder woont in een groot kasteel met vier torens.
+Ik heb een tekening gemaakt van een draak.
+Op het strand bouwen we een zandkasteel.
+In de herfst vallen de bladeren van de bomen.
+Mijn oma maakt de lekkerste pannenkoeken.
+De piraat zoekt een schat op een klein eiland.
+Weet jij hoeveel planeten er om de zon draaien?
+We fietsen samen door het park naar huis.
+Als het sneeuwt, maken we een grote sneeuwpop.
+De juf vertelt een spannend verhaal over een heks.
+Mijn hamster rent de hele nacht in zijn rad.
+Na het eten mogen we nog even buiten spelen.
+Een kikker kan heel ver springen.
+In de winter kun je soms schaatsen op het meer.
+Hoe snel kan jij typen zonder te kijken?
+Het vliegtuig vliegt hoog boven de wolken.
+Mijn vader maakt mijn fiets in de schuur.
+De eekhoorn verstopt nootjes voor de winter.
+Wij hebben een tent opgezet in de tuin.
+Een olifant heeft een lange slurf en grote oren.
+Wat is jouw lievelingskleur: rood, blauw of groen?
+Ik neem een boterham met kaas mee naar school.
+Het konijn eet een wortel in de wei.
+Op zondag gaan we vaak naar opa en oma.
+De dolfijn springt hoog uit het water.
+Kom op, nog een paar letters en dan ben je klaar!
+Vandaag leren we alles over vulkanen.
+Mijn zus kan heel mooi piano spelen.
+In de ruimte is het heel koud en heel stil.
+De brandweer blust het vuur met veel water.
+Een spin maakt een web om vliegjes te vangen.
+Mijn beste vriend woont naast de bakker.
+We zingen een lied voor de jarige juf.
+Wie het eerst bij de boom is, heeft gewonnen!
+Het is tijd voor een pauze: pak je fruit maar.
+De trein naar zee vertrekt om negen uur.
+In de bieb kun je gratis boeken lenen.
+Met een telescoop kun je de sterren goed zien.
+De zeehond ligt lekker te zonnen op het zand.
+Ik heb een nieuwe tandenborstel gekregen.
+Wij spelen een potje schaak na het eten.
+De bakker bakt elke ochtend vers brood.
+Mijn knuffel gaat altijd mee op vakantie.
+In het museum zagen we een echte dino.
+Een regenboog heeft zeven mooie kleuren.
+Zullen we samen een hut bouwen in het bos?
+De vos sluipt stil door het hoge gras.
+Na de regen komt de zon weer tevoorschijn.
+Mijn moeder werkt in een groot ziekenhuis.
+Kijk eens hoe hoog die vlieger vliegt!
+Het ruimteschip landt op een rode planeet.
+Een zebra heeft zwarte en witte strepen.
+We maken een taart met aardbeien en slagroom.
+Oefening baart kunst: typ elke dag een beetje.
+De kraai pakt een glimmende knoop van het pad.
+Mijn buurjongen heeft een grote witte hond.
+Heb je je jas, je tas en je sleutel mee?
+Wij gaan met de boot naar een eiland.
+De kip, de koe en het schaap wonen op de boerderij.
+Wij zagen een zee-egel op het strand.
+Het is een zonnige dag - kom je buiten spelen?
+Het is tien over half vier - tijd om naar huis te gaan.
+Mijn opa heeft een oude auto met een dak dat open kan.
+De sterren schijnen fel: het is een heldere nacht.
+Hoera, de zomervakantie begint vandaag!
+Zet je vingers op de thuisrij en typ maar raak.
+Met de fiets ben ik in tien minuten op school.
+Weet je wat ik in de tuin vond? Een egel!
+De maan draait om de aarde, en de aarde om de zon.
+Wat ruikt er zo lekker in de keuken?
+Onze klas heeft een aquarium met zes vissen.
+De wind blaast de hoed van zijn hoofd.
+Kan een struisvogel eigenlijk vliegen? Nee hoor!
+Ik tel tot tien: een, twee, drie, vier, vijf.
+Een uil kan in het donker heel goed zien.
+Samen spelen is veel leuker dan alleen.

@@ -9,6 +9,8 @@ const options: EngineOptions = {
   comfortSlots: 5,
   catchUpRate: 4,
   pointsPerStroke: 10,
+  comboTiers: [],
+  flawlessWordBonus: 0,
 };
 
 function started(
@@ -42,7 +44,7 @@ describe("rule 2: every keystroke consumes exactly one character", () => {
   it("marks a correct stroke, scores it and moves on", () => {
     const engine = started("fj");
     expect(engine.key("f", 100)).toEqual([
-      { type: "strokeCorrect", index: 0, char: "f" },
+      { type: "strokeCorrect", index: 0, char: "f", points: 10 },
     ]);
     expect(engine.chars[0].state).toBe("correct");
     expect(engine.cursor).toBe(1);
@@ -70,11 +72,13 @@ describe("rule 2: every keystroke consumes exactly one character", () => {
     engine.key("f", 100);
     expect(engine.key("j", 200)).toEqual([
       { type: "strokeWrong", index: 1, expected: " ", typed: "j" },
+      { type: "comboBroken", combo: 1 },
     ]);
     expect(engine.key("j", 300)[0]).toEqual({
       type: "strokeCorrect",
       index: 2,
       char: "j",
+      points: 10,
     });
   });
 
@@ -181,6 +185,7 @@ describe("level end", () => {
     engine.key("f", 100);
     expect(engine.key("k", 200)).toEqual([
       { type: "strokeWrong", index: 1, expected: "j", typed: "k" },
+      { type: "comboBroken", combo: 1 },
       { type: "levelComplete" },
     ]);
     expect(engine.completed).toBe(true);
@@ -209,5 +214,88 @@ describe("level end", () => {
     const engine = started("f");
     engine.key("f", 0);
     expect(engine.update(10_000)).toEqual([]);
+  });
+});
+
+describe("scoring", () => {
+  const tiers = [
+    { combo: 3, multiplier: 2 },
+    { combo: 5, multiplier: 3 },
+  ];
+
+  it("counts a combo of consecutive correct strokes", () => {
+    const engine = started("fjfjfj");
+    for (const k of "fjf") engine.key(k, 0);
+    expect(engine.combo).toBe(3);
+  });
+
+  it("resets the combo on a wrong key and remembers the best combo", () => {
+    const engine = started("fjfjfj");
+    for (const k of "fjfk") engine.key(k, 0);
+    expect(engine.combo).toBe(0);
+    expect(engine.bestCombo).toBe(3);
+  });
+
+  it("resets the combo on a miss", () => {
+    const engine = started("fjfjfj", { comfortSlots: 100 });
+    engine.key("f", 0);
+    const events = engine.update(6_000); // character 1 reaches the laser
+    expect(events).toContainEqual({ type: "comboBroken", combo: 1 });
+    expect(engine.combo).toBe(0);
+  });
+
+  it("announces each tier once and multiplies the points", () => {
+    const engine = started("fjfjfjfj", { comboTiers: tiers });
+    const all = [..."fjfjfj"].flatMap((k) => engine.key(k, 0));
+    expect(all.filter((e) => e.type === "comboTier")).toEqual([
+      { type: "comboTier", tier: 1, multiplier: 2 },
+      { type: "comboTier", tier: 2, multiplier: 3 },
+    ]);
+    // strokes 1-2: x1, 3-4: x2, 5-6: x3  →  10+10+20+20+30+30
+    expect(engine.score).toBe(120);
+  });
+
+  it("gives a bonus for a word without mistakes, times the multiplier", () => {
+    const engine = started("fj jf", { flawlessWordBonus: 25 });
+    engine.key("f", 0);
+    expect(engine.key("j", 0)).toContainEqual({
+      type: "flawlessWord",
+      start: 0,
+      end: 2,
+      bonus: 25,
+    });
+    engine.key(" ", 0);
+    engine.key("j", 0);
+    expect(engine.key("f", 0)).toContainEqual({
+      type: "flawlessWord",
+      start: 3,
+      end: 5,
+      bonus: 25,
+    });
+  });
+
+  it("gives no word bonus after a mistake in the word, or for one-letter words", () => {
+    const engine = started("fj f", { flawlessWordBonus: 25 });
+    const all = [..."fk f"].flatMap((k) => engine.key(k, 0));
+    expect(all.some((e) => e.type === "flawlessWord")).toBe(false);
+  });
+
+  it("reports accuracy and whole-run SPM", () => {
+    const engine = started("fjfj", { startSlots: 1000, comfortSlots: 1000 });
+    engine.key("f", 15_000);
+    engine.key("k", 30_000);
+    engine.key("f", 45_000);
+    engine.key("j", 60_000);
+    const stats = engine.stats();
+    expect(stats.accuracy).toBe(0.75);
+    expect(stats.spm).toBe(3); // 3 correct in 1 minute
+    expect(stats).toMatchObject({ correct: 3, wrong: 1, missed: 0 });
+  });
+
+  it("measures live SPM over a rolling window", () => {
+    const engine = started("fjfjfjfjfj");
+    for (let i = 0; i < 10; i++) engine.key("fjfjfjfjfj"[i], i * 1_000);
+    // 10 strokes in the last 10 s (window 20 s, but only 10 s since start) → 60 SPM
+    expect(engine.liveSpm(10_000, 20_000, 5_000)).toBeCloseTo(60);
   });
 });

@@ -1,13 +1,15 @@
 import Phaser from "phaser";
 import "./style.css";
 import { config } from "./config";
-import { testLevelText } from "./content/testLevel";
+import { loadContent } from "./content/load";
 import { PlayScene } from "./game/scenes/PlayScene";
 import { t } from "./i18n";
 import { attachKeyboard } from "./input/keyboard";
 import { Session } from "./Session";
+import { SaveStore } from "./storage/storage";
 import { Hud } from "./ui/Hud";
 import { Overlay } from "./ui/Overlay";
+import { messageScreen } from "./ui/screens";
 import { fitStageToWindow } from "./ui/stage";
 import { TextPanel } from "./ui/TextPanel";
 import { applyTheme } from "./ui/theme";
@@ -32,7 +34,16 @@ async function main(): Promise<void> {
   const overlay = new Overlay(byId("overlay"));
 
   if (isTouchOnly()) {
-    overlay.showKeyboardNeeded();
+    overlay.show(messageScreen(t("warning.keyboardNeeded")), () => {});
+    return;
+  }
+
+  let content;
+  try {
+    content = await loadContent();
+  } catch (error) {
+    console.error(error);
+    overlay.show(messageScreen(t("error.content")), () => {});
     return;
   }
 
@@ -55,11 +66,12 @@ async function main(): Promise<void> {
   await scene.ready;
 
   const session = new Session(
-    testLevelText,
+    content,
     scene,
     new Hud(byId("hud")),
     new TextPanel(byId("panel")),
     overlay,
+    new SaveStore(window.localStorage),
   );
 
   // STEP fires every frame before the scene draws, so the engine is always up to date.
@@ -72,6 +84,8 @@ async function main(): Promise<void> {
   attachKeyboard(window, {
     onChar: (char, timeMs) => session.onChar(char, timeMs),
     onEnter: () => session.onEnter(),
+    onEscape: () => session.onEscape(),
+    onNav: (direction) => session.onNav(direction),
     onCapsLock: (on) => (capsWarning.hidden = !on),
   });
 }

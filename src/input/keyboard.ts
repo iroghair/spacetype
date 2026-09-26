@@ -1,9 +1,11 @@
-import { classifyKey } from "./classifyKey";
+import { classifyKey, type Direction } from "./classifyKey";
 
 export interface KeyboardHandlers {
   /** A character was typed (the character produced, i.e. event.key). */
   onChar(char: string, timeMs: number): void;
   onEnter(): void;
+  onEscape(): void;
+  onNav(direction: Direction): void;
   /** Called whenever Caps Lock turns on or off (and once on the first key). */
   onCapsLock(on: boolean): void;
 }
@@ -34,6 +36,14 @@ export function attachKeyboard(
       case "enter":
         e.preventDefault();
         handlers.onEnter();
+        break;
+      case "escape":
+        e.preventDefault();
+        handlers.onEscape();
+        break;
+      case "nav":
+        e.preventDefault(); // arrows would otherwise scroll the page
+        handlers.onNav(action.direction);
         break;
       case "ignore":
         if (action.preventDefault) e.preventDefault();
