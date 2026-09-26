@@ -17,6 +17,7 @@ export function applyTheme(root: HTMLElement = document.documentElement): void {
     "--color-correct": cssColor(colors.correct),
     "--color-wrong": cssColor(colors.wrong),
     "--color-arrow": cssColor(colors.arrow),
+    "--color-star": cssColor(colors.star),
     "--font-family": `"${fonts.family}"`,
     "--panel-size": `${fonts.panelSize}px`,
     "--mark-size": `${fonts.markSize}px`,

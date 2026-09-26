@@ -50,10 +50,16 @@ export class PlayScene extends Phaser.Scene {
 
   /** Begin drawing a new run. */
   startRun(engine: TypingEngine): void {
+    this.stopRun();
+    this.engine = engine;
+  }
+
+  /** Clear the field (back to just stars and laser). */
+  stopRun(): void {
     for (const letter of this.letters.values()) letter.destroy();
     this.letters.clear();
     this.spawnedUpTo = 0;
-    this.engine = engine;
+    this.engine = undefined;
     this.arrow.setVisible(false);
   }
 
@@ -212,7 +218,7 @@ export class PlayScene extends Phaser.Scene {
             Phaser.Math.Between(0, config.layout.fieldHeight),
             "star",
           )
-          .setTint(config.colors.star)
+          .setTint(config.colors.starfield)
           .setAlpha(layer.alpha)
           // Texture is 8 px wide, so scale = size / 8 gives a dot `size` px across.
           .setScale(layer.size / 8);

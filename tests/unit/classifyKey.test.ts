@@ -24,8 +24,20 @@ describe("classifyKey", () => {
     expect(classifyKey(key("'"))).toEqual({ kind: "char", char: "'" });
   });
 
-  it("recognises Enter", () => {
+  it("recognises Enter and Escape", () => {
     expect(classifyKey(key("Enter"))).toEqual({ kind: "enter" });
+    expect(classifyKey(key("Escape"))).toEqual({ kind: "escape" });
+  });
+
+  it("turns arrow keys into menu directions", () => {
+    expect(classifyKey(key("ArrowUp"))).toEqual({
+      kind: "nav",
+      direction: "up",
+    });
+    expect(classifyKey(key("ArrowLeft"))).toEqual({
+      kind: "nav",
+      direction: "left",
+    });
   });
 
   it("ignores modifier-only keys", () => {
