@@ -1,3 +1,4 @@
+import type { Sound } from "./audio/Sound";
 import { config } from "./config";
 import type { Content, Level } from "./content/types";
 import { buildRunText } from "./engine/levelRunner";
@@ -6,11 +7,17 @@ import { TypingEngine } from "./engine/TypingEngine";
 import type { GameEvent } from "./engine/types";
 import type { PlayScene } from "./game/scenes/PlayScene";
 import type { Direction } from "./input/classifyKey";
-import type { SaveStore } from "./storage/storage";
+import type { SaveStore, Settings } from "./storage/storage";
 import type { FingerGuide } from "./ui/FingerGuide";
+import type { Fireworks } from "./ui/Fireworks";
 import type { Hud } from "./ui/Hud";
 import type { Overlay } from "./ui/Overlay";
-import { introScreen, levelSelectScreen, resultsScreen } from "./ui/screens";
+import {
+  introScreen,
+  levelSelectScreen,
+  resultsScreen,
+  type SettingChoice,
+} from "./ui/screens";
 import type { TextPanel } from "./ui/TextPanel";
 
 // What the game is doing right now:
@@ -23,6 +30,8 @@ declare global {
   interface Window {
     /** Dev-only hook so the Playwright tests can read the run text. */
     __spacetype?: { text: string };
+    /** Dev-only: current frames per second. */
+    __fps?: () => number;
   }
 }
 
@@ -40,8 +49,10 @@ export class Session {
     private readonly overlay: Overlay,
     private readonly saves: SaveStore,
     private readonly guide: FingerGuide,
+    private readonly sound: Sound,
+    private readonly fireworks: Fireworks,
   ) {
-    this.guide.setVisible(this.saves.settings.fingerGuide);
+    this.applySettings(this.saves.settings);
     this.showLevelSelect(this.content.levels[0]);
   }
 
@@ -71,25 +82,51 @@ export class Session {
     this.refreshHud(timeMs);
   }
 
-  /** `focus` is a level, or "settings" for the finger-guide switch. */
-  private showLevelSelect(focus: Level | "settings"): void {
+  /** `focus` is a level, or one of the settings buttons below the grid. */
+  private showLevelSelect(focus: Level | SettingChoice): void {
     this.stopRun();
     const levels = this.content.levels;
-    const guideOn = this.saves.settings.fingerGuide;
+    const screen = levelSelectScreen(
+      levels,
+      (id) => this.saves.best(id),
+      this.saves.settings,
+    );
     this.overlay.show(
-      levelSelectScreen(levels, (id) => this.saves.best(id), guideOn),
+      screen,
       (i) => {
         if (i < levels.length) {
           this.showIntro(levels[i]);
         } else {
-          // The last choice is the finger-guide switch.
-          this.saves.updateSettings({ fingerGuide: !guideOn });
-          this.guide.setVisible(!guideOn);
-          this.showLevelSelect("settings");
+          const setting = screen.settings[i - levels.length];
+          this.changeSetting(setting);
+          this.showLevelSelect(setting);
         }
       },
-      focus === "settings" ? levels.length : levels.indexOf(focus),
+      typeof focus === "string"
+        ? levels.length + screen.settings.indexOf(focus)
+        : levels.indexOf(focus),
     );
+  }
+
+  private changeSetting(setting: SettingChoice): void {
+    const current = this.saves.settings;
+    if (setting === "volume") {
+      // Cycle to the next volume step (after the loudest, back to the quietest).
+      const steps = config.audio.volumeSteps;
+      const next = steps.find((v) => v > current.volume + 0.001) ?? steps[0];
+      this.saves.updateSettings({ volume: next });
+    } else {
+      this.saves.updateSettings({ [setting]: !current[setting] });
+    }
+    this.applySettings(this.saves.settings);
+    if (setting !== "fingerGuide") this.sound.correct(0); // let the player hear the change
+  }
+
+  private applySettings(settings: Settings): void {
+    this.guide.setVisible(settings.fingerGuide);
+    this.sound.setEnabled(settings.sound);
+    this.sound.setVolume(settings.volume);
+    this.sound.setMusic(settings.music);
   }
 
   private showIntro(level: Level): void {
@@ -108,8 +145,12 @@ export class Session {
       pointsPerStroke: config.scoring.pointsPerStroke,
       comboTiers: config.scoring.comboTiers,
       flawlessWordBonus: config.scoring.flawlessWordBonus,
+      spmWindowMs: config.scoring.spmWindowMs,
+      spmMinWindowMs: config.scoring.spmMinWindowMs,
+      turbo: config.scoring.turbo,
     });
     this.engine.start(performance.now());
+    this.fireworks.stop();
     this.phase = "playing";
     this.overlay.hide();
     this.scene.startRun(this.engine);
@@ -134,6 +175,7 @@ export class Session {
   private dispatch(events: GameEvent[]): void {
     if (events.length === 0 || !this.engine) return;
     this.scene.handleEvents(events);
+    this.sound.handleEvents(events, this.engine.combo);
     this.refreshText();
     if (events.some((e) => e.type === "levelComplete")) {
       this.phase = "finishing";
@@ -177,6 +219,7 @@ export class Session {
       hasNext: next !== undefined,
     });
     this.phase = "menu";
+    this.celebrate(stars, newRecord);
     this.overlay.show(
       screen,
       (i) => {
@@ -187,6 +230,26 @@ export class Session {
       },
       screen.order.indexOf(next ? "next" : "again"),
     );
+  }
+
+  // Fireworks and fanfare for the results screen; a record gets the big version.
+  private celebrate(stars: number, newRecord: boolean): void {
+    const { celebration } = config;
+    if (newRecord) {
+      this.fireworks.show(celebration.recordBursts, ["star", "circle"]);
+      this.scene.celebrateRecord();
+      this.sound.record();
+    } else {
+      this.fireworks.show(celebration.levelCompleteBursts);
+      this.sound.levelComplete();
+    }
+    // A tick for each star as it pops in (timed to the CSS animation delays).
+    for (let i = 0; i < stars; i++) {
+      window.setTimeout(
+        () => this.sound.star(i),
+        300 + i * celebration.starDelayMs,
+      );
+    }
   }
 
   private refreshHud(timeMs: number): void {
@@ -203,6 +266,7 @@ export class Session {
       ),
       targetSpm: this.level!.targetSpm,
       accuracy: engine.accuracy,
+      turbo: engine.turbo ? config.scoring.turbo.multiplier : undefined,
     });
   }
 }

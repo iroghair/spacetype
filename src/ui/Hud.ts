@@ -10,6 +10,8 @@ export interface HudValues {
   targetSpm: number;
   /** 0–1 */
   accuracy: number;
+  /** Turbo multiplier while turbo is on, else undefined. */
+  turbo?: number;
 }
 
 // The bar at the top: score, combo, SPM meter and accuracy.
@@ -22,6 +24,7 @@ export class Hud {
   private readonly meterFill: HTMLElement;
   private readonly meterTarget: HTMLElement;
   private readonly accuracy: HTMLElement;
+  private readonly turbo: HTMLElement;
   private shown = new Map<HTMLElement, string>();
 
   constructor(private readonly root: HTMLElement) {
@@ -62,6 +65,11 @@ export class Hud {
     this.meterTarget.style.left = `${(100 / config.hud.meterMax).toFixed(1)}%`;
 
     this.accuracy = item("", "accuracy").value;
+    this.turbo = document.createElement("div");
+    this.turbo.className = "turbo";
+    this.turbo.dataset.testid = "turbo";
+    this.turbo.hidden = true;
+    root.append(this.turbo);
     const spacer = document.createElement("div");
     spacer.className = "hud-spacer";
     root.append(spacer);
@@ -79,6 +87,10 @@ export class Hud {
     const spm = Math.round(v.spm);
     this.set(this.spm, String(spm));
     this.set(this.accuracy, `${Math.round(v.accuracy * 100)}%`);
+
+    this.turbo.hidden = v.turbo === undefined;
+    if (v.turbo !== undefined)
+      this.set(this.turbo, t("hud.turbo", { multiplier: v.turbo }));
 
     const ratio = v.targetSpm > 0 ? spm / v.targetSpm : 0;
     const width = `${(Math.min(ratio, config.hud.meterMax) / config.hud.meterMax) * 100}%`;

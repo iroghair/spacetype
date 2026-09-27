@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import "./style.css";
+import { Sound } from "./audio/Sound";
 import { config } from "./config";
 import { loadContent } from "./content/load";
 import { PlayScene } from "./game/scenes/PlayScene";
@@ -8,6 +9,7 @@ import { attachKeyboard } from "./input/keyboard";
 import { Session } from "./Session";
 import { SaveStore } from "./storage/storage";
 import { FingerGuide } from "./ui/FingerGuide";
+import { Fireworks } from "./ui/Fireworks";
 import { Hud } from "./ui/Hud";
 import { Overlay } from "./ui/Overlay";
 import { messageScreen } from "./ui/screens";
@@ -53,12 +55,16 @@ async function main(): Promise<void> {
     `${config.fonts.flyingSize}px "${config.fonts.family}"`,
   );
 
+  // Audio may only start after the player touches the keyboard or mouse.
+  const sound = new Sound();
+  window.addEventListener("pointerdown", () => sound.unlock());
+
   const scene = new PlayScene();
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: "field",
     width: config.layout.width,
-    height: config.layout.fieldHeight,
+    height: config.layout.height,
     backgroundColor: config.colors.background,
     // The stage (see ui/stage.ts) does the scaling, so Phaser keeps its own size.
     scale: { mode: Phaser.Scale.NONE },
@@ -74,7 +80,12 @@ async function main(): Promise<void> {
     overlay,
     new SaveStore(window.localStorage),
     new FingerGuide(byId("guide")),
+    sound,
+    new Fireworks(byId("fireworks") as HTMLCanvasElement),
   );
+
+  // Dev-only: lets tests and the console read the frame rate.
+  if (import.meta.env.DEV) window.__fps = () => game.loop.actualFps;
 
   // STEP fires every frame before the scene draws, so the engine is always up to date.
   game.events.on(Phaser.Core.Events.STEP, () =>
@@ -84,6 +95,7 @@ async function main(): Promise<void> {
   const capsWarning = byId("caps-warning");
   capsWarning.textContent = t("warning.capsLock");
   attachKeyboard(window, {
+    onAnyKey: () => sound.unlock(),
     onChar: (char, timeMs) => session.onChar(char, timeMs),
     onEnter: () => session.onEnter(),
     onEscape: () => session.onEscape(),

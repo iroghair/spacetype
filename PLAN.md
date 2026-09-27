@@ -223,11 +223,11 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 
 ### Phase 5 — Effects & sound
 
-- [ ] Confetti burst per correct letter; fire/firework burst per burned letter
-- [ ] Combo-tier celebrations, turbo mode, record banner, level-complete fireworks, mascot and fly-by sprites
-- [ ] Sound effects: correct (pitch rises with combo), wrong, burn, tier-up, turbo, level complete, record. Optional ambient music loop, off by default.
-- [ ] Audio unlocks on the first key press; mute and volume in settings
-- [ ] Performance: steady 60 fps on a modest laptop; particle counts capped in config
+- [x] Confetti burst per correct letter; fire/firework burst per burned letter
+- [x] Combo-tier celebrations, turbo mode, record banner, level-complete fireworks, mascot and fly-by sprites
+- [x] Sound effects: correct (pitch rises with combo), wrong, burn, tier-up, turbo, level complete, record. Optional ambient music loop, off by default.
+- [x] Audio unlocks on the first key press; mute and volume in settings
+- [ ] Performance: steady 60 fps on a modest laptop; particle counts capped in config _(caps done; 60 fps to be confirmed by the owner on a real laptop)_
 
 **Done when:** the kids say "wow" (the owner judges).
 
@@ -259,3 +259,6 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 - **Personal record:** "Nieuw record!" shows when score or SPM beats an earlier result of the same level (not on the very first play).
 - **Level 12–15 content:** level 12 mixes capitalised words with short sentences; 13 uses sentences with ? ! : -; 14 short sentences (≤ 30 characters); 15 long sentences (31+). Tune in `content/nl/levels.json`.
 - **Finger guide:** space lights up both thumbs; 6 is typed with the right index finger. To make room, the text panel and play field are now 216 px each and the guide 240 px (`layout` in `src/config.ts`).
+- **Laser look:** full screen height, sine wave with 12 periods, peaks moving down, amplitude swinging +1 → -1 over 4 s (`laser` in `src/config.ts`). Its glow changes colour with each combo tier.
+- **Turbo:** live SPM ≥ 120% of target for 10 s doubles points until the pace drops (`scoring.turbo`).
+- **Sounds and sprites** are made in code (no files), so there is nothing to license. Music is off by default.

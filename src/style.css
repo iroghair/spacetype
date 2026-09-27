@@ -36,16 +36,25 @@ body {
   transform-origin: center;
   display: flex;
   flex-direction: column;
+  align-items: center;
+}
+
+/* Everything except the canvas sits on top of it. */
+#stage > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- HUD ---------- */
 
 #hud {
+  align-self: stretch;
   height: var(--hud-height);
   display: flex;
   align-items: center;
-  gap: 36px;
-  padding: 0 40px;
+  gap: 26px;
+  /* Keep clear of the laser on the left. */
+  padding: 0 40px 0 110px;
   font-size: 22px;
   color: var(--color-text-dim);
   white-space: nowrap;
@@ -73,7 +82,7 @@ body {
 /* SPM meter: fills towards the target line, turns green when on target. */
 .meter {
   position: relative;
-  width: 140px;
+  width: 120px;
   height: 14px;
   margin-right: 4px;
   border-radius: 7px;
@@ -102,11 +111,18 @@ body {
 
 /* ---------- Text panel ---------- */
 
+/* A centred box, narrower than the screen, so the laser stays visible. */
 #panel {
+  width: var(--panel-width);
   height: var(--panel-height);
   box-sizing: border-box;
-  padding: 8px 40px;
-  background: var(--color-panel-background);
+  padding: 8px 32px;
+  border-radius: 18px;
+  background: color-mix(
+    in srgb,
+    var(--color-panel-background) 88%,
+    transparent
+  );
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -115,6 +131,7 @@ body {
 .line {
   position: relative;
   display: flex;
+  justify-content: center;
   font-size: var(--panel-size);
 }
 
@@ -172,12 +189,30 @@ body {
 
 /* ---------- Play field and finger guide ---------- */
 
-#field {
-  height: var(--field-height);
+#stage > #field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   line-height: 0; /* no gap under the canvas */
 }
 
+/* Empty space where the letters fly (drawn on the canvas behind). */
+#letter-band {
+  height: var(--field-height);
+  flex: none;
+}
+
+#stage > #fireworks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
 #guide {
+  align-self: stretch;
   flex: 1;
   display: flex;
   justify-content: center;
@@ -241,7 +276,7 @@ body {
 
 /* ---------- Messages ---------- */
 
-#caps-warning {
+#stage > #caps-warning {
   position: absolute;
   left: 50%;
   top: calc(var(--hud-height) + var(--panel-height) + 12px);
@@ -254,8 +289,9 @@ body {
   font-weight: 700;
 }
 
-#overlay {
+#stage > #overlay {
   position: absolute;
+  z-index: 5;
   inset: 0;
   display: flex;
   align-items: center;
@@ -353,6 +389,44 @@ body {
   color: var(--color-star);
   font-weight: 700;
   font-size: 30px;
+  animation: record-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes record-pulse {
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+/* Earned stars start invisible and pop in, one after the other. */
+.star-pop {
+  display: inline-block;
+  opacity: 0;
+  animation: star-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+}
+
+.star-empty {
+  opacity: 0.35;
+}
+
+@keyframes star-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2) rotate(-40deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* HUD turbo badge */
+#hud .turbo {
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: var(--color-arrow);
+  color: var(--color-background);
+  font-weight: 700;
 }
 
 table.stats {

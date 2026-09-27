@@ -182,10 +182,66 @@ test("the finger guide can be switched off, and stays off after a reload", async
   // Down three rows from level 1 reaches the switch below the grid.
   for (let i = 0; i < 3; i++) await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("toggle-finger-guide")).toContainText("uit");
+  await expect(page.getByTestId("setting-fingerGuide")).toContainText("uit");
   await expect(page.locator("#guide")).toHaveCSS("visibility", "hidden");
   await page.screenshot({ path: `${shots}/11-guide-off.png` });
   await page.reload();
-  await expect(page.getByTestId("toggle-finger-guide")).toContainText("uit");
+  await expect(page.getByTestId("setting-fingerGuide")).toContainText("uit");
   await expect(page.locator("#guide")).toHaveCSS("visibility", "hidden");
+});
+
+// ---------- Effects & sound (phase 5) ----------
+
+test("typing fast for a while turns on turbo, with a badge in the HUD", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (err) => errors.push(err.message));
+  // Level 3: 100 characters. At one key per 130 ms (~460 SPM) turbo starts after 10 s.
+  const text = await startLevel(page, ["ArrowRight", "ArrowRight"]);
+  await page.keyboard.type(text.slice(0, 20), { delay: 130 });
+  await page.screenshot({ path: `${shots}/12-tier-popup.png` });
+  await page.keyboard.type(text.slice(20, 85), { delay: 130 });
+  await expect(page.getByTestId("turbo")).toBeVisible();
+  await page.screenshot({ path: `${shots}/13-turbo.png` });
+  await page.keyboard.type(text.slice(85), { delay: 20 });
+  await expect(page.getByTestId("screen-results")).toBeVisible();
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: `${shots}/14-results-fireworks.png` });
+  expect(errors).toEqual([]);
+});
+
+test("beating a score shows the record banner", async ({ page }) => {
+  // First run: slow and sloppy. Second run: perfect. The second is a record.
+  let text = await startLevel(page);
+  await page.keyboard.type(text.replaceAll("f", "k"), { delay: 10 });
+  await expect(page.getByTestId("screen-results")).toBeVisible();
+  await page.keyboard.press("ArrowLeft"); // "Again"
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("screen-intro")).toBeVisible();
+  await page.keyboard.press("Enter");
+  text = await page.evaluate(() => window.__spacetype!.text);
+  await page.keyboard.type(text, { delay: 10 });
+  await expect(page.getByTestId("screen-results")).toContainText(
+    "Nieuw record!",
+  );
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${shots}/15-record.png` });
+});
+
+test("sound, volume and music buttons change and are remembered", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.getByTestId("setting-sound")).toContainText("aan");
+  await expect(page.getByTestId("setting-music")).toContainText("uit");
+  await page.getByTestId("setting-sound").click();
+  await page.getByTestId("setting-volume").click();
+  await page.getByTestId("setting-music").click();
+  await expect(page.getByTestId("setting-sound")).toContainText("uit");
+  await expect(page.getByTestId("setting-volume")).toContainText("75%");
+  await expect(page.getByTestId("setting-music")).toContainText("aan");
+  await page.reload();
+  await expect(page.getByTestId("setting-sound")).toContainText("uit");
+  await expect(page.getByTestId("setting-volume")).toContainText("75%");
 });

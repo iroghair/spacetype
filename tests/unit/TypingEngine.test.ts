@@ -11,6 +11,10 @@ const options: EngineOptions = {
   pointsPerStroke: 10,
   comboTiers: [],
   flawlessWordBonus: 0,
+  spmWindowMs: 20_000,
+  spmMinWindowMs: 5_000,
+  // Out of reach unless a test lowers it.
+  turbo: { ratio: 1000, holdMs: 10_000, multiplier: 2 },
 };
 
 function started(
@@ -297,5 +301,75 @@ describe("scoring", () => {
     for (let i = 0; i < 10; i++) engine.key("fjfjfjfjfj"[i], i * 1_000);
     // 10 strokes in the last 10 s (window 20 s, but only 10 s since start) → 60 SPM
     expect(engine.liveSpm(10_000, 20_000, 5_000)).toBeCloseTo(60);
+  });
+});
+
+describe("turbo", () => {
+  // 60 SPM target; turbo at 1.2 × 60 = 72 SPM, held for 3 s.
+  const turbo = { ratio: 1.2, holdMs: 3_000, multiplier: 2 };
+  const text = "f".repeat(200);
+
+  // Type one correct key every `gapMs`, from `fromMs` to `toMs`; collect events.
+  function typeSteadily(
+    engine: TypingEngine,
+    fromMs: number,
+    toMs: number,
+    gapMs: number,
+  ) {
+    const events = [];
+    for (let t = fromMs; t <= toMs; t += gapMs)
+      events.push(...engine.key("f", t));
+    return events;
+  }
+
+  it("starts after typing fast enough for long enough, and doubles the points", () => {
+    const engine = started(text, {
+      turbo,
+      startSlots: 1000,
+      comfortSlots: 1000,
+    });
+    // 500 ms per key = 120 SPM, well above 72.
+    const events = typeSteadily(engine, 500, 8_000, 500);
+    const at = events.findIndex((e) => e.type === "turboStart");
+    expect(at).toBeGreaterThan(-1);
+    expect(engine.turbo).toBe(true);
+    const after = events.slice(at).find((e) => e.type === "strokeCorrect");
+    expect(after).toMatchObject({ points: 20 });
+  });
+
+  it("does not start when typing at target pace", () => {
+    const engine = started(text, {
+      turbo,
+      startSlots: 1000,
+      comfortSlots: 1000,
+    });
+    const events = typeSteadily(engine, 1_000, 30_000, 1_000); // 60 SPM
+    expect(events.some((e) => e.type === "turboStart")).toBe(false);
+  });
+
+  it("ends when typing slows down", () => {
+    const engine = started(text, {
+      turbo,
+      startSlots: 1000,
+      comfortSlots: 1000,
+    });
+    typeSteadily(engine, 500, 8_000, 500);
+    expect(engine.turbo).toBe(true);
+    // Nothing typed for a long while: the rolling SPM drops below 72.
+    const events = engine.update(25_000);
+    expect(events).toContainEqual({ type: "turboEnd" });
+    expect(engine.turbo).toBe(false);
+  });
+
+  it("ends when the level completes", () => {
+    const engine = started("f".repeat(20), {
+      turbo,
+      startSlots: 1000,
+      comfortSlots: 1000,
+    });
+    const events = typeSteadily(engine, 250, 5_000, 250);
+    const types = events.map((e) => e.type);
+    expect(types).toContain("turboStart");
+    expect(types.slice(-2)).toEqual(["turboEnd", "levelComplete"]);
   });
 });

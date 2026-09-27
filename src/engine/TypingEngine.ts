@@ -16,6 +16,8 @@ export class TypingEngine {
   bestCombo = 0;
   started = false;
   completed = false;
+  /** Turbo mode is on (see rule "Turbo" in PLAN.md). */
+  turbo = false;
 
   private scroll = 0;
   private lastTimeMs = 0;
@@ -27,6 +29,8 @@ export class TypingEngine {
   private readonly wordStart: number[];
   /** Times of all correct strokes, for the SPM meter. */
   private readonly strokeTimes: number[] = [];
+  /** Since when live SPM has been above the turbo threshold (undefined = it isn't). */
+  private fastSince?: number;
 
   constructor(
     text: string,
@@ -59,6 +63,11 @@ export class TypingEngine {
   /** Current score multiplier from the combo. */
   get multiplier(): number {
     return multiplierFor(this.combo, this.options.comboTiers);
+  }
+
+  /** Everything points are multiplied by right now: combo, and turbo if on. */
+  private get totalMultiplier(): number {
+    return this.multiplier * (this.turbo ? this.options.turbo.multiplier : 1);
   }
 
   /** Live strokes per minute over a rolling window (see scoring.rollingSpm). */
@@ -143,6 +152,7 @@ export class TypingEngine {
       this.burnIndex++;
     }
 
+    this.checkTurbo(events, nowMs);
     this.checkComplete(events, nowMs);
     return events;
   }
@@ -161,7 +171,7 @@ export class TypingEngine {
       info.state = "correct";
       this.strokeTimes.push(nowMs);
       this.growCombo(events);
-      const points = this.options.pointsPerStroke * this.multiplier;
+      const points = this.options.pointsPerStroke * this.totalMultiplier;
       this.score += points;
       events.push({ type: "strokeCorrect", index, char: key, points });
       this.checkFlawlessWord(index, events);
@@ -213,16 +223,43 @@ export class TypingEngine {
     for (let i = start; i <= index; i++) {
       if (this.chars[i].state !== "correct") return;
     }
-    const bonus = this.options.flawlessWordBonus * this.multiplier;
+    const bonus = this.options.flawlessWordBonus * this.totalMultiplier;
     if (bonus <= 0) return;
     this.score += bonus;
     events.push({ type: "flawlessWord", start, end: index + 1, bonus });
+  }
+
+  // Turbo starts after live SPM has stayed at or above the threshold for
+  // holdMs, and stops as soon as it drops below.
+  private checkTurbo(events: GameEvent[], nowMs: number): void {
+    if (this.completed) return;
+    const { turbo, targetSpm, spmWindowMs, spmMinWindowMs } = this.options;
+    const fast =
+      this.liveSpm(nowMs, spmWindowMs, spmMinWindowMs) >=
+      turbo.ratio * targetSpm;
+    if (!fast) {
+      this.fastSince = undefined;
+      if (this.turbo) {
+        this.turbo = false;
+        events.push({ type: "turboEnd" });
+      }
+      return;
+    }
+    this.fastSince ??= nowMs;
+    if (!this.turbo && nowMs - this.fastSince >= turbo.holdMs) {
+      this.turbo = true;
+      events.push({ type: "turboStart" });
+    }
   }
 
   private checkComplete(events: GameEvent[], nowMs: number): void {
     if (!this.completed && this.cursor >= this.chars.length) {
       this.completed = true;
       this.endTimeMs = nowMs;
+      if (this.turbo) {
+        this.turbo = false;
+        events.push({ type: "turboEnd" });
+      }
       events.push({ type: "levelComplete" });
     }
   }

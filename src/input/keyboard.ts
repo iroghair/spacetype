@@ -1,6 +1,8 @@
 import { classifyKey, type Direction } from "./classifyKey";
 
 export interface KeyboardHandlers {
+  /** Any key was pressed (used to unlock audio, which browsers only allow after input). */
+  onAnyKey(): void;
   /** A character was typed (the character produced, i.e. event.key). */
   onChar(char: string, timeMs: number): void;
   onEnter(): void;
@@ -26,6 +28,7 @@ export function attachKeyboard(
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
+    handlers.onAnyKey();
     checkCapsLock(e);
     const action = classifyKey(e);
     switch (action.kind) {

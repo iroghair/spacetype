@@ -3,7 +3,7 @@ import type { Level } from "../content/types";
 import type { ConfusedKey } from "../engine/scoring";
 import type { RunStats } from "../engine/types";
 import { t } from "../i18n";
-import type { LevelBest } from "../storage/storage";
+import type { LevelBest, Settings } from "../storage/storage";
 
 // Builders for the message boxes shown over the game. Each returns the box and
 // the elements that act as choices. Texts always go in via textContent, never
@@ -41,11 +41,14 @@ export function formatKeys(keys: string): string {
     .join(" ");
 }
 
+/** The settings buttons on the level select screen, in order. */
+export type SettingChoice = "fingerGuide" | "sound" | "volume" | "music";
+
 export function levelSelectScreen(
   levels: readonly Level[],
   best: (id: number) => LevelBest | undefined,
-  fingerGuideOn: boolean,
-): Screen {
+  settings: Settings,
+): Screen & { settings: SettingChoice[] } {
   const box = el("div", "box wide");
   box.dataset.testid = "screen-select";
   box.append(el("h1", "", t("select.title")));
@@ -68,19 +71,34 @@ export function levelSelectScreen(
     grid.append(card);
     return card;
   });
-  // The finger-guide switch comes last, below the grid.
-  const toggle = el(
-    "button",
-    "choice setting",
-    t("settings.fingerGuide", {
-      state: t(fingerGuideOn ? "settings.on" : "settings.off"),
-    }),
-  );
-  toggle.dataset.testid = "toggle-finger-guide";
-  const settings = el("div", "choices");
-  settings.append(toggle);
-  box.append(grid, settings, el("p", "hint", t("select.hint")));
-  return { box, choices: [...choices, toggle], columns: 5 };
+  // Settings buttons come last, in a row below the grid.
+  const onOff = (on: boolean) => t(on ? "settings.on" : "settings.off");
+  const settingButtons: [SettingChoice, string][] = [
+    [
+      "fingerGuide",
+      t("settings.fingerGuide", { state: onOff(settings.fingerGuide) }),
+    ],
+    ["sound", t("settings.sound", { state: onOff(settings.sound) })],
+    [
+      "volume",
+      t("settings.volume", { percent: Math.round(settings.volume * 100) }),
+    ],
+    ["music", t("settings.music", { state: onOff(settings.music) })],
+  ];
+  const row = el("div", "choices");
+  const buttons = settingButtons.map(([id, label]) => {
+    const button = el("button", "choice setting", label);
+    button.dataset.testid = `setting-${id}`;
+    row.append(button);
+    return button;
+  });
+  box.append(grid, row, el("p", "hint", t("select.hint")));
+  return {
+    box,
+    choices: [...choices, ...buttons],
+    columns: 5,
+    settings: settingButtons.map(([id]) => id),
+  };
 }
 
 export function introScreen(level: Level): Screen {
@@ -121,7 +139,18 @@ export function resultsScreen(
   const box = el("div", "box");
   box.dataset.testid = "screen-results";
   box.append(el("h1", "", t("results.title")));
-  box.append(el("div", "stars big", starsText(info.stars)));
+  // Stars pop in one by one (see .star-pop in style.css).
+  const stars = el("div", "stars big");
+  for (let i = 0; i < 3; i++) {
+    const star = el(
+      "span",
+      i < info.stars ? "star-pop" : "star-empty",
+      i < info.stars ? "★" : "☆",
+    );
+    star.style.animationDelay = `${300 + i * config.celebration.starDelayMs}ms`;
+    stars.append(star);
+  }
+  box.append(stars);
   if (info.newRecord) box.append(el("p", "record", t("results.newRecord")));
 
   const table = el("table", "stats");
