@@ -7,6 +7,7 @@ import { t } from "./i18n";
 import { attachKeyboard } from "./input/keyboard";
 import { Session } from "./Session";
 import { SaveStore } from "./storage/storage";
+import { FingerGuide } from "./ui/FingerGuide";
 import { Hud } from "./ui/Hud";
 import { Overlay } from "./ui/Overlay";
 import { messageScreen } from "./ui/screens";
@@ -72,6 +73,7 @@ async function main(): Promise<void> {
     new TextPanel(byId("panel")),
     overlay,
     new SaveStore(window.localStorage),
+    new FingerGuide(byId("guide")),
   );
 
   // STEP fires every frame before the scene draws, so the engine is always up to date.

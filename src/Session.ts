@@ -7,6 +7,7 @@ import type { GameEvent } from "./engine/types";
 import type { PlayScene } from "./game/scenes/PlayScene";
 import type { Direction } from "./input/classifyKey";
 import type { SaveStore } from "./storage/storage";
+import type { FingerGuide } from "./ui/FingerGuide";
 import type { Hud } from "./ui/Hud";
 import type { Overlay } from "./ui/Overlay";
 import { introScreen, levelSelectScreen, resultsScreen } from "./ui/screens";
@@ -38,7 +39,9 @@ export class Session {
     private readonly panel: TextPanel,
     private readonly overlay: Overlay,
     private readonly saves: SaveStore,
+    private readonly guide: FingerGuide,
   ) {
+    this.guide.setVisible(this.saves.settings.fingerGuide);
     this.showLevelSelect(this.content.levels[0]);
   }
 
@@ -68,13 +71,24 @@ export class Session {
     this.refreshHud(timeMs);
   }
 
-  private showLevelSelect(focusLevel: Level): void {
+  /** `focus` is a level, or "settings" for the finger-guide switch. */
+  private showLevelSelect(focus: Level | "settings"): void {
     this.stopRun();
     const levels = this.content.levels;
+    const guideOn = this.saves.settings.fingerGuide;
     this.overlay.show(
-      levelSelectScreen(levels, (id) => this.saves.best(id)),
-      (i) => this.showIntro(levels[i]),
-      levels.indexOf(focusLevel),
+      levelSelectScreen(levels, (id) => this.saves.best(id), guideOn),
+      (i) => {
+        if (i < levels.length) {
+          this.showIntro(levels[i]);
+        } else {
+          // The last choice is the finger-guide switch.
+          this.saves.updateSettings({ fingerGuide: !guideOn });
+          this.guide.setVisible(!guideOn);
+          this.showLevelSelect("settings");
+        }
+      },
+      focus === "settings" ? levels.length : levels.indexOf(focus),
     );
   }
 
@@ -100,19 +114,27 @@ export class Session {
     this.overlay.hide();
     this.scene.startRun(this.engine);
     this.panel.setText(text);
-    this.panel.update(this.engine.chars, this.engine.cursor);
+    this.refreshText();
   }
 
   private stopRun(): void {
     this.phase = "menu";
     this.engine = undefined;
     this.scene.stopRun();
+    this.guide.show(undefined);
+  }
+
+  /** Update the text panel and the finger guide for the next character. */
+  private refreshText(): void {
+    const engine = this.engine!;
+    this.panel.update(engine.chars, engine.cursor);
+    this.guide.show(engine.chars[engine.cursor]?.char);
   }
 
   private dispatch(events: GameEvent[]): void {
     if (events.length === 0 || !this.engine) return;
     this.scene.handleEvents(events);
-    this.panel.update(this.engine.chars, this.engine.cursor);
+    this.refreshText();
     if (events.some((e) => e.type === "levelComplete")) {
       this.phase = "finishing";
       const engine = this.engine;

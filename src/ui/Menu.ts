@@ -24,7 +24,16 @@ export class Menu {
     const step = { left: -1, right: 1, up: -this.columns, down: this.columns }[
       direction
     ];
-    const next = this.focus + step;
+    let next = this.focus + step;
+    // Moving down from a full row onto a shorter last row lands on its last item.
+    const lastRow = Math.floor((this.items.length - 1) / this.columns);
+    if (
+      direction === "down" &&
+      next >= this.items.length &&
+      Math.floor(this.focus / this.columns) < lastRow
+    ) {
+      next = this.items.length - 1;
+    }
     if (next >= 0 && next < this.items.length) this.setFocus(next);
   }
 
