@@ -26,6 +26,7 @@ npm run test        # Vitest unit tests
 npm run test:e2e    # Playwright smoke test
 npm run typecheck   # tsc --noEmit
 npm run content     # validate + sort content into public/content/
+.venv/bin/python scripts/generate_topic_texts.py   # generate topic texts for review (see the script's header)
 ```
 
 ## Architecture rules
@@ -35,7 +36,7 @@ npm run content     # validate + sort content into public/content/
 - There is one keyboard listener, in `src/input/`, and it feeds the engine.
 - All tunables live in `src/config.ts`. No magic numbers in scenes.
 - All user-facing text goes through `src/i18n/` (Dutch is the default). Never hard-code UI strings.
-- Keep dependencies minimal: Phaser, canvas-confetti, Vite, Vitest, Playwright, Prettier, @types/node (type descriptions only, dev-only). Ask before adding anything else.
+- Keep dependencies minimal: Phaser, canvas-confetti, Vite, Vitest, Playwright, Prettier, @types/node (type descriptions only, dev-only), and `anthropic` (Python, only for the owner's local topic-text generator). Ask before adding anything else.
 
 ## Keyboard input gotchas
 
