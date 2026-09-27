@@ -8,9 +8,9 @@ export const config = {
     width: 1280,
     height: 720,
     hudHeight: 48,
-    panelHeight: 240,
-    fieldHeight: 232, // the Phaser play field
-    // The rest (720 - 48 - 240 - 232 = 200) is kept free for the finger guide (phase 4).
+    panelHeight: 216,
+    fieldHeight: 216, // the Phaser play field
+    // The rest (720 - 48 - 216 - 216 = 240) is the finger guide.
   },
 
   colors: {
@@ -26,12 +26,20 @@ export const config = {
     laserCore: 0xffffff,
     laserGlow: 0xff3b5c,
     burn: 0xff8a3b,
+    // Finger guide: one colour per finger, the same on both hands.
+    fingers: {
+      pinky: 0xc792ea,
+      ring: 0x82aaff,
+      middle: 0x5ee0a0,
+      index: 0xffcb6b,
+      thumb: 0xf78c6c,
+    },
   },
 
   fonts: {
     family: "Atkinson Hyperlegible Mono",
-    panelSize: 34, // letters in the text panel
-    markSize: 20, // the small wrong-key marks above letters
+    panelSize: 32, // letters in the text panel
+    markSize: 18, // the small wrong-key marks above letters
     flyingSize: 44, // letters in the play field
   },
 
@@ -69,6 +77,14 @@ export const config = {
       three: { accuracy: 0.95, spmRatio: 1 },
     },
     confusedKeysShown: 3, // most-confused keys listed on the results screen
+  },
+
+  guide: {
+    unit: 30, // size of one letter key, in pixels
+    gap: 3, // space between keys
+    handHeight: 62, // height of the hands below the keyboard
+    bottomMargin: 10, // free space below the hands
+    handGap: 20, // space between the two hands
   },
 
   hud: {

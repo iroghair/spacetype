@@ -179,6 +179,64 @@ body {
 
 #guide {
   flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* On-screen keyboard: each key is tinted with its finger's colour (--finger). */
+#guide .key rect {
+  fill: var(--finger);
+  fill-opacity: 0.18;
+  stroke: var(--finger);
+  stroke-opacity: 0.5;
+}
+
+#guide .key text {
+  fill: var(--color-text);
+  font-family: var(--font-family), monospace;
+  font-size: 16px;
+  text-anchor: middle;
+}
+
+#guide .key text.small {
+  font-size: 11px;
+}
+
+/* The next key: full colour and a gentle pulse. */
+#guide .key.next rect {
+  fill-opacity: 1;
+  stroke: var(--color-text);
+  stroke-opacity: 1;
+  stroke-width: 2;
+  animation: key-pulse 0.9s ease-in-out infinite;
+}
+
+#guide .key.next text {
+  fill: var(--color-background);
+  font-weight: 700;
+}
+
+@keyframes key-pulse {
+  50% {
+    fill-opacity: 0.55;
+  }
+}
+
+#guide .palm {
+  fill: var(--color-text-dim);
+  fill-opacity: 0.25;
+}
+
+#guide .finger {
+  fill: var(--finger);
+  fill-opacity: 0.3;
+}
+
+#guide .finger.active {
+  fill-opacity: 1;
+  stroke: var(--color-text);
+  stroke-width: 3;
 }
 
 /* ---------- Messages ---------- */
