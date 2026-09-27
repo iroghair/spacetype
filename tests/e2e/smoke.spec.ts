@@ -102,3 +102,90 @@ test("backspace does nothing", async ({ page }) => {
   );
   await expect(page.getByTestId("combo")).toHaveText("2");
 });
+
+// ---------- Finger guide ----------
+
+const LEFT_HAND = "qwertasdfgzxcvb";
+
+// Sorted, because the page lists keys in on-screen order.
+async function litKeys(page: Page): Promise<string[]> {
+  return page
+    .locator("#guide .key.next")
+    .evaluateAll((els) =>
+      els.map((e) => (e as HTMLElement).dataset.key!).sort(),
+    );
+}
+
+async function litFingers(page: Page): Promise<string[]> {
+  return page
+    .locator("#guide .finger.active")
+    .evaluateAll((els) =>
+      els.map((e) => (e as HTMLElement).dataset.finger!).sort(),
+    );
+}
+
+test("the finger guide follows the next letter and space in level 1", async ({
+  page,
+}) => {
+  const text = await startLevel(page);
+  for (let i = 0; i < 6; i++) {
+    const c = text[i];
+    const expected = c === " " ? ["Space"] : [c === "f" ? "KeyF" : "KeyJ"];
+    const fingers =
+      c === " " ? ["L-thumb", "R-thumb"] : [c === "f" ? "L-index" : "R-index"];
+    await expect.poll(() => litKeys(page)).toEqual(expected);
+    await expect.poll(() => litFingers(page)).toEqual(fingers);
+    if (i === 0) await page.screenshot({ path: `${shots}/8-guide-level1.png` });
+    await page.keyboard.type(c);
+  }
+});
+
+test("capitals light up the key and the opposite-hand Shift (level 12)", async ({
+  page,
+}) => {
+  // Level 12 is the second card on the bottom row.
+  const text = await startLevel(page, ["ArrowDown", "ArrowDown", "ArrowRight"]);
+  const i = text.search(/[A-Z]/);
+  await page.keyboard.type(text.slice(0, i), { delay: 10 });
+  const capital = text[i];
+  const left = LEFT_HAND.includes(capital.toLowerCase());
+  await expect
+    .poll(() => litKeys(page))
+    .toEqual([`Key${capital}`, left ? "ShiftRight" : "ShiftLeft"].sort());
+  expect(await litFingers(page)).toContain(left ? "R-pinky" : "L-pinky");
+  await page.screenshot({ path: `${shots}/9-guide-capital.png` });
+});
+
+test("punctuation lights up the right key (level 13)", async ({ page }) => {
+  const text = await startLevel(page, [
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowRight",
+    "ArrowRight",
+  ]);
+  const i = text.search(/[?!:]/);
+  await page.keyboard.type(text.slice(0, i), { delay: 10 });
+  const expected = {
+    "?": ["Slash", "ShiftLeft"],
+    "!": ["Digit1", "ShiftRight"],
+    ":": ["Semicolon", "ShiftLeft"],
+  }[text[i] as "?" | "!" | ":"];
+  await expect.poll(() => litKeys(page)).toEqual([...expected].sort());
+  await page.screenshot({ path: `${shots}/10-guide-punctuation.png` });
+});
+
+test("the finger guide can be switched off, and stays off after a reload", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.getByTestId("screen-select")).toBeVisible();
+  // Down three rows from level 1 reaches the switch below the grid.
+  for (let i = 0; i < 3; i++) await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("toggle-finger-guide")).toContainText("uit");
+  await expect(page.locator("#guide")).toHaveCSS("visibility", "hidden");
+  await page.screenshot({ path: `${shots}/11-guide-off.png` });
+  await page.reload();
+  await expect(page.getByTestId("toggle-finger-guide")).toContainText("uit");
+  await expect(page.locator("#guide")).toHaveCSS("visibility", "hidden");
+});
