@@ -8,12 +8,16 @@
   <body>
     <!-- A fixed 1280×720 stage, scaled to fit the window by src/ui/stage.ts. -->
     <div id="stage">
+      <!-- Phaser canvas: the whole stage, behind everything else. -->
+      <div id="field"></div>
       <div id="hud"></div>
       <div id="panel"></div>
-      <div id="field"></div>
+      <div id="letter-band"></div>
       <div id="guide"></div>
       <div id="caps-warning" hidden></div>
       <div id="overlay" hidden></div>
+      <!-- Big fireworks, on top of everything; never blocks clicks. -->
+      <canvas id="fireworks"></canvas>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

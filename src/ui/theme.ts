@@ -9,6 +9,7 @@ export function applyTheme(root: HTMLElement = document.documentElement): void {
     "--stage-height": `${layout.height}px`,
     "--hud-height": `${layout.hudHeight}px`,
     "--panel-height": `${layout.panelHeight}px`,
+    "--panel-width": `${layout.panelWidth}px`,
     "--field-height": `${layout.fieldHeight}px`,
     "--color-background": cssColor(colors.background),
     "--color-panel-background": cssColor(colors.panelBackground),
