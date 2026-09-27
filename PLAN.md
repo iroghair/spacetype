@@ -264,3 +264,4 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 - **Sounds and sprites** are made in code (no files), so there is nothing to license. Music is off by default.
 - **Topic difficulty bands** follow from text length (`content/nl/topics/topics.json`): Makkelijk ≤ 45 characters (60 SPM), Gemiddeld ≤ 90 (75 SPM), Moeilijk ≤ 160 (90 SPM). The generator asks for texts of the right length per band; the pipeline sorts approved texts into bands by length.
 - **Topic generator model:** Claude Opus 5 (`claude-opus-5`) with structured output, and `fallbacks: "default"` so a declined request is retried on a fallback model.
+- **Settings screen:** the level menu has "Onderwerpen" and "Instellingen". Settings: finger guide, sound, volume, music, fly-bys (rockets/UFOs/astronauts, on by default) and "Voortgang wissen", which asks for confirmation and then erases all records and settings on the device.

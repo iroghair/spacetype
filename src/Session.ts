@@ -22,9 +22,12 @@ import {
   bandSelectScreen,
   introScreen,
   levelSelectScreen,
+  resetConfirmScreen,
   resultsScreen,
+  settingsScreen,
   topicIntroScreen,
   topicSelectScreen,
+  type MenuChoice,
   type SettingChoice,
 } from "./ui/screens";
 import type { TextPanel } from "./ui/TextPanel";
@@ -98,29 +101,56 @@ export class Session {
 
   // ---------- Menus ----------
 
-  /** `focus` is a level, or one of the buttons in the bottom row. */
-  private showLevelSelect(focus: Level | SettingChoice): void {
+  /** `focus` is a level, or one of the buttons below the grid. */
+  private showLevelSelect(focus: Level | MenuChoice): void {
     this.stopRun();
     this.back = undefined;
     const levels = this.content.levels;
-    const screen = levelSelectScreen(
-      levels,
-      (key) => this.saves.best(key),
-      this.saves.settings,
-    );
+    const screen = levelSelectScreen(levels, (key) => this.saves.best(key));
     this.overlay.show(
       screen,
       (i) => {
         if (i < levels.length)
           return this.showIntro({ kind: "level", level: levels[i] });
-        const choice = screen.settings[i - levels.length];
-        if (choice === "topics") return this.showTopicSelect();
-        this.changeSetting(choice);
-        this.showLevelSelect(choice);
+        if (screen.extras[i - levels.length] === "topics")
+          this.showTopicSelect();
+        else this.showSettings();
       },
       typeof focus === "string"
-        ? levels.length + screen.settings.indexOf(focus)
+        ? levels.length + screen.extras.indexOf(focus)
         : levels.indexOf(focus),
+    );
+  }
+
+  private showSettings(focus: SettingChoice = "fingerGuide"): void {
+    this.stopRun();
+    this.back = () => this.showLevelSelect("settings");
+    const screen = settingsScreen(this.saves.settings);
+    this.overlay.show(
+      screen,
+      (i) => {
+        const choice = screen.order[i];
+        if (choice === "back") return this.showLevelSelect("settings");
+        if (choice === "reset") return this.showResetConfirm();
+        this.changeSetting(choice);
+        this.showSettings(choice);
+      },
+      screen.order.indexOf(focus),
+    );
+  }
+
+  private showResetConfirm(): void {
+    this.back = () => this.showSettings("reset");
+    this.overlay.show(
+      resetConfirmScreen(),
+      (i) => {
+        if (i === 1) {
+          this.saves.reset();
+          this.applySettings(this.saves.settings);
+        }
+        this.showSettings("reset");
+      },
+      0, // "No" is highlighted, so a quick Enter doesn't wipe anything
     );
   }
 
@@ -155,7 +185,9 @@ export class Session {
     );
   }
 
-  private changeSetting(setting: Exclude<SettingChoice, "topics">): void {
+  private changeSetting(
+    setting: Exclude<SettingChoice, "reset" | "back">,
+  ): void {
     const current = this.saves.settings;
     if (setting === "volume") {
       // Cycle to the next volume step (after the loudest, back to the quietest).
@@ -174,6 +206,7 @@ export class Session {
     this.sound.setEnabled(settings.sound);
     this.sound.setVolume(settings.volume);
     this.sound.setMusic(settings.music);
+    this.scene.setFlyBys(settings.flyBys);
   }
 
   // ---------- Running a level or topic ----------
