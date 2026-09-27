@@ -31,6 +31,9 @@
   "results.next": "Next level",
   "results.levels": "Levels",
   "results.hint": "Choose with the arrow keys and press Enter",
+  "settings.fingerGuide": "Finger guide: {state}",
+  "settings.on": "on",
+  "settings.off": "off",
   "warning.capsLock": "Caps Lock is on!",
   "warning.keyboardNeeded": "SpaceType needs a keyboard. Play on a laptop or computer.",
   "error.content": "The game could not be loaded. Refresh the page to try again."

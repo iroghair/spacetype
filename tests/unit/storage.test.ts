@@ -75,4 +75,20 @@ describe("SaveStore", () => {
     store.record(1, run);
     expect(store.best(1)).toEqual(run);
   });
+
+  it("has the finger guide on by default and remembers when it is switched off", () => {
+    const backing = fakeStore();
+    const store = new SaveStore(backing);
+    expect(store.settings.fingerGuide).toBe(true);
+    store.updateSettings({ fingerGuide: false });
+    expect(new SaveStore(backing).settings.fingerGuide).toBe(false);
+  });
+
+  it("reads saves from before settings existed", () => {
+    const old =
+      '{"version":1,"bests":{"1":{"score":5,"spm":1,"accuracy":1,"stars":1}}}';
+    const store = new SaveStore(fakeStore({ spacetype: old }));
+    expect(store.settings.fingerGuide).toBe(true);
+    expect(store.best(1)?.score).toBe(5);
+  });
 });

@@ -214,10 +214,10 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 
 ### Phase 4 — Finger guide
 
-- [ ] Key → finger mapping table and tests, including opposite-hand Shift
-- [ ] On-screen keyboard: colour-coded zones, next-key pulse
-- [ ] Stylised hands with the active finger highlighted
-- [ ] Settings toggle; Playwright screenshots reviewed for correctness
+- [x] Key → finger mapping table and tests, including opposite-hand Shift
+- [x] On-screen keyboard: colour-coded zones, next-key pulse
+- [x] Stylised hands with the active finger highlighted
+- [x] Settings toggle; Playwright screenshots reviewed for correctness
 
 **Done when:** for every key used in levels 1–13, the guide shows the right key and the right finger.
 
@@ -258,3 +258,4 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 - **Flawless-word bonus:** 20 points × multiplier for every word (2+ letters) typed without a mistake.
 - **Personal record:** "Nieuw record!" shows when score or SPM beats an earlier result of the same level (not on the very first play).
 - **Level 12–15 content:** level 12 mixes capitalised words with short sentences; 13 uses sentences with ? ! : -; 14 short sentences (≤ 30 characters); 15 long sentences (31+). Tune in `content/nl/levels.json`.
+- **Finger guide:** space lights up both thumbs; 6 is typed with the right index finger. To make room, the text panel and play field are now 216 px each and the guide 240 px (`layout` in `src/config.ts`).

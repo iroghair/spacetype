@@ -31,6 +31,9 @@
   "results.next": "Volgende level",
   "results.levels": "Levels",
   "results.hint": "Kies met de pijltjes en druk op Enter",
+  "settings.fingerGuide": "Vingerhulp: {state}",
+  "settings.on": "aan",
+  "settings.off": "uit",
   "warning.capsLock": "Caps Lock staat aan!",
   "warning.keyboardNeeded": "Voor SpaceType heb je een toetsenbord nodig. Speel op een laptop of computer.",
   "error.content": "Het spel kon niet worden geladen. Ververs de pagina om het opnieuw te proberen."

@@ -12,9 +12,18 @@ export interface LevelBest {
   stars: number;
 }
 
+export interface Settings {
+  /** Show the on-screen keyboard and hands. */
+  fingerGuide: boolean;
+}
+
+const DEFAULT_SETTINGS: Settings = { fingerGuide: true };
+
 export interface SaveData {
   version: typeof VERSION;
   bests: Record<string, LevelBest>;
+  /** Added in phase 4; older saves don't have it yet. */
+  settings?: Partial<Settings>;
 }
 
 function empty(): SaveData {
@@ -29,6 +38,15 @@ export class SaveStore {
 
   constructor(private readonly store: KeyValueStore) {
     this.data = this.load();
+  }
+
+  get settings(): Settings {
+    return { ...DEFAULT_SETTINGS, ...this.data.settings };
+  }
+
+  updateSettings(changes: Partial<Settings>): void {
+    this.data.settings = { ...this.data.settings, ...changes };
+    this.save();
   }
 
   best(levelId: number): LevelBest | undefined {

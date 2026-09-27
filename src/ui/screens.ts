@@ -44,6 +44,7 @@ export function formatKeys(keys: string): string {
 export function levelSelectScreen(
   levels: readonly Level[],
   best: (id: number) => LevelBest | undefined,
+  fingerGuideOn: boolean,
 ): Screen {
   const box = el("div", "box wide");
   box.dataset.testid = "screen-select";
@@ -67,8 +68,19 @@ export function levelSelectScreen(
     grid.append(card);
     return card;
   });
-  box.append(grid, el("p", "hint", t("select.hint")));
-  return { box, choices, columns: 5 };
+  // The finger-guide switch comes last, below the grid.
+  const toggle = el(
+    "button",
+    "choice setting",
+    t("settings.fingerGuide", {
+      state: t(fingerGuideOn ? "settings.on" : "settings.off"),
+    }),
+  );
+  toggle.dataset.testid = "toggle-finger-guide";
+  const settings = el("div", "choices");
+  settings.append(toggle);
+  box.append(grid, settings, el("p", "hint", t("select.hint")));
+  return { box, choices: [...choices, toggle], columns: 5 };
 }
 
 export function introScreen(level: Level): Screen {
