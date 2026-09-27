@@ -60,8 +60,9 @@ export class SaveStore {
     this.save();
   }
 
-  best(levelId: number): LevelBest | undefined {
-    return this.data.bests[levelId];
+  /** Best result for a level ("3") or topic run ("topic-vissen-2"). */
+  best(key: string): LevelBest | undefined {
+    return this.data.bests[key];
   }
 
   /**
@@ -69,9 +70,9 @@ export class SaveStore {
    * run can set the SPM record while an earlier run keeps the accuracy record.
    * Returns the previous best (undefined on the first run of this level).
    */
-  record(levelId: number, run: LevelBest): LevelBest | undefined {
-    const previous = this.data.bests[levelId];
-    this.data.bests[levelId] = previous
+  record(key: string, run: LevelBest): LevelBest | undefined {
+    const previous = this.data.bests[key];
+    this.data.bests[key] = previous
       ? {
           score: Math.max(previous.score, run.score),
           spm: Math.max(previous.spm, run.spm),

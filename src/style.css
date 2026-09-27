@@ -464,6 +464,34 @@ ul.confused {
   font-weight: 700 !important;
 }
 
+/* The bottom row of the level menu: five buttons, a little smaller. */
+#overlay .choice.setting,
+#overlay .choice.topics-button {
+  padding: 8px 14px;
+  font-size: 18px;
+}
+
+#overlay .choice.topics-button {
+  border-color: var(--color-arrow);
+  color: var(--color-arrow);
+}
+
+.topic-card {
+  padding: 22px 6px !important;
+  font-size: 22px !important;
+}
+
+.choices.bands .choice {
+  min-width: 180px;
+  line-height: 1.4;
+}
+
+/* Topics or bands without texts yet. */
+#overlay button.disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 @keyframes blink {
   50% {
     opacity: 0.4;

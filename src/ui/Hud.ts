@@ -2,7 +2,8 @@ import { config } from "../config";
 import { t } from "../i18n";
 
 export interface HudValues {
-  levelId: number;
+  /** Right-hand label, e.g. "Level 3" or "Vissen". */
+  label: string;
   score: number;
   combo: number;
   multiplier: number;
@@ -78,7 +79,7 @@ export class Hud {
 
   update(v: HudValues): void {
     this.root.style.visibility = "visible";
-    this.set(this.level, t("hud.level", { id: v.levelId }));
+    this.set(this.level, v.label);
     this.set(this.score, v.score.toLocaleString("nl-NL"));
     this.set(
       this.combo,
