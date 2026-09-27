@@ -91,4 +91,19 @@ describe("SaveStore", () => {
     expect(store.settings.fingerGuide).toBe(true);
     expect(store.best("1")?.score).toBe(5);
   });
+
+  it("has fly-bys on by default", () => {
+    expect(new SaveStore(fakeStore()).settings.flyBys).toBe(true);
+  });
+
+  it("reset forgets all records and settings, also after a reload", () => {
+    const backing = fakeStore();
+    const store = new SaveStore(backing);
+    store.record("1", run);
+    store.updateSettings({ fingerGuide: false, flyBys: false });
+    store.reset();
+    expect(store.best("1")).toBeUndefined();
+    expect(store.settings).toMatchObject({ fingerGuide: true, flyBys: true });
+    expect(new SaveStore(backing).best("1")).toBeUndefined();
+  });
 });

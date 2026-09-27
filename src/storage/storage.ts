@@ -21,6 +21,8 @@ export interface Settings {
   volume: number;
   /** Background music on (off by default). */
   music: boolean;
+  /** Rockets, UFOs and astronauts flying past at combo tier-ups. */
+  flyBys: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -28,6 +30,7 @@ const DEFAULT_SETTINGS: Settings = {
   sound: true,
   volume: 0.5,
   music: false,
+  flyBys: true,
 };
 
 export interface SaveData {
@@ -57,6 +60,12 @@ export class SaveStore {
 
   updateSettings(changes: Partial<Settings>): void {
     this.data.settings = { ...this.data.settings, ...changes };
+    this.save();
+  }
+
+  /** Forget everything saved on this device: all records and settings. */
+  reset(): void {
+    this.data = empty();
     this.save();
   }
 
