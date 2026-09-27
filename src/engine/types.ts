@@ -27,6 +27,9 @@ export type GameEvent =
   | { type: "comboBroken"; combo: number }
   /** Every letter of the word from `start` to `end` (exclusive) was correct. */
   | { type: "flawlessWord"; start: number; end: number; bonus: number }
+  /** Typing fast enough for long enough: points count extra until turboEnd. */
+  | { type: "turboStart" }
+  | { type: "turboEnd" }
   | { type: "levelComplete" };
 
 export interface EngineOptions {
@@ -46,6 +49,11 @@ export interface EngineOptions {
   comboTiers: readonly ComboTier[];
   /** Bonus for a word typed without mistakes, before the combo multiplier. */
   flawlessWordBonus: number;
+  /** Rolling window for live SPM (used for turbo). */
+  spmWindowMs: number;
+  spmMinWindowMs: number;
+  /** Turbo: live SPM ≥ ratio × target for holdMs → points × multiplier. */
+  turbo: { ratio: number; holdMs: number; multiplier: number };
 }
 
 /** Summary of a finished run, for the results screen. */
