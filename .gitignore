@@ -9,3 +9,7 @@ public/content/
 # Playwright output
 test-results/
 playwright-report/
+
+# Python virtual environment for scripts/
+.venv/
+__pycache__/
