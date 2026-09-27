@@ -310,6 +310,10 @@ body {
   font-size: 24px;
 }
 
+#overlay .box.narrow {
+  max-width: 640px;
+}
+
 #overlay h1 {
   margin: 0 0 16px;
   font-size: 44px;
@@ -464,16 +468,25 @@ ul.confused {
   font-weight: 700 !important;
 }
 
-/* The bottom row of the level menu: five buttons, a little smaller. */
-#overlay .choice.setting,
-#overlay .choice.topics-button {
-  padding: 8px 14px;
-  font-size: 18px;
-}
-
-#overlay .choice.topics-button {
+/* Topics and settings buttons below the level grid. */
+#overlay .choice.menu-button {
+  min-width: 200px;
   border-color: var(--color-arrow);
   color: var(--color-arrow);
+}
+
+/* The settings screen: one button per line. */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px auto 0;
+  width: 380px;
+}
+
+#overlay .choice.danger {
+  border-color: var(--color-wrong);
+  color: var(--color-wrong);
 }
 
 .topic-card {

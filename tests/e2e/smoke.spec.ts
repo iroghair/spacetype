@@ -68,6 +68,8 @@ test("finishing a level shows results and saves the best on the level card", asy
 test("a sentence level lists the confused keys on the results screen", async ({
   page,
 }) => {
+  // A long text: typing it takes a while in the (software-rendered) test browser.
+  test.setTimeout(60_000);
   // Level 15 is the last card: two rows down, four to the right.
   const text = await startLevel(page, [
     "ArrowDown",
@@ -179,14 +181,18 @@ test("the finger guide can be switched off, and stays off after a reload", async
 }) => {
   await page.goto("/");
   await expect(page.getByTestId("screen-select")).toBeVisible();
-  // Down three rows from level 1 reaches the bottom row; the switch is second.
+  // Down three rows from level 1 reaches the row below the grid; "Instellingen" is second.
   for (let i = 0; i < 3; i++) await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("screen-settings")).toBeVisible();
+  // The finger guide switch is the first setting.
   await page.keyboard.press("Enter");
   await expect(page.getByTestId("setting-fingerGuide")).toContainText("uit");
   await expect(page.locator("#guide")).toHaveCSS("visibility", "hidden");
   await page.screenshot({ path: `${shots}/11-guide-off.png` });
   await page.reload();
+  await page.getByTestId("menu-settings").click();
   await expect(page.getByTestId("setting-fingerGuide")).toContainText("uit");
   await expect(page.locator("#guide")).toHaveCSS("visibility", "hidden");
 });
@@ -234,6 +240,7 @@ test("sound, volume and music buttons change and are remembered", async ({
   page,
 }) => {
   await page.goto("/");
+  await page.getByTestId("menu-settings").click();
   await expect(page.getByTestId("setting-sound")).toContainText("aan");
   await expect(page.getByTestId("setting-music")).toContainText("uit");
   await page.getByTestId("setting-sound").click();
@@ -243,6 +250,7 @@ test("sound, volume and music buttons change and are remembered", async ({
   await expect(page.getByTestId("setting-volume")).toContainText("75%");
   await expect(page.getByTestId("setting-music")).toContainText("aan");
   await page.reload();
+  await page.getByTestId("menu-settings").click();
   await expect(page.getByTestId("setting-sound")).toContainText("uit");
   await expect(page.getByTestId("setting-volume")).toContainText("75%");
 });
@@ -254,7 +262,7 @@ test("pick a topic and difficulty, type its texts, and see the best on the band"
 }) => {
   await page.goto("/");
   await expect(page.getByTestId("screen-select")).toBeVisible();
-  // "Onderwerpen" is the first button in the bottom row, three rows down.
+  // "Onderwerpen" is the first button below the grid, three rows down.
   for (let i = 0; i < 3; i++) await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   await expect(page.getByTestId("screen-topics")).toBeVisible();
@@ -288,7 +296,7 @@ test("Escape walks back from a topic intro to the level menu", async ({
 }) => {
   await page.goto("/");
   await expect(page.getByTestId("screen-select")).toBeVisible();
-  await page.getByTestId("setting-topics").click();
+  await page.getByTestId("menu-topics").click();
   await page.getByTestId("topic-sport").click();
   await page.getByTestId("band-2").click();
   await expect(page.getByTestId("screen-intro")).toContainText("Sport");
@@ -298,4 +306,47 @@ test("Escape walks back from a topic intro to the level menu", async ({
   await expect(page.getByTestId("screen-topics")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("screen-select")).toBeVisible();
+});
+
+// ---------- Settings screen ----------
+
+test("fly-bys can be switched off and stay off", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("menu-settings").click();
+  await expect(page.getByTestId("setting-flyBys")).toContainText("aan");
+  await page.getByTestId("setting-flyBys").click();
+  await expect(page.getByTestId("setting-flyBys")).toContainText("uit");
+  await page.screenshot({ path: `${shots}/19-settings.png` });
+  await page.reload();
+  await page.getByTestId("menu-settings").click();
+  await expect(page.getByTestId("setting-flyBys")).toContainText("uit");
+});
+
+test("erasing progress asks first, then clears records and settings", async ({
+  page,
+}) => {
+  // Earn a record on level 1 and switch the finger guide off.
+  const text = await startLevel(page);
+  await page.keyboard.type(text, { delay: 10 });
+  await expect(page.getByTestId("screen-results")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("level-1")).toContainText("Record");
+  await page.getByTestId("menu-settings").click();
+  await page.getByTestId("setting-fingerGuide").click();
+
+  // "No" keeps everything.
+  await page.getByTestId("setting-reset").click();
+  await expect(page.getByTestId("screen-reset")).toBeVisible();
+  await page.screenshot({ path: `${shots}/20-reset-confirm.png` });
+  await page.keyboard.press("Enter"); // "Nee, terug" is highlighted
+  await expect(page.getByTestId("setting-fingerGuide")).toContainText("uit");
+
+  // "Yes" wipes records and settings.
+  await page.getByTestId("setting-reset").click();
+  await page.getByTestId("reset-yes").click();
+  await expect(page.getByTestId("setting-fingerGuide")).toContainText("aan");
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("level-1")).not.toContainText("Record");
+  await page.reload();
+  await expect(page.getByTestId("level-1")).not.toContainText("Record");
 });

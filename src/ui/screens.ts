@@ -42,15 +42,13 @@ export function formatKeys(keys: string): string {
     .join(" ");
 }
 
-/** The buttons in the bottom row of the level select screen, in order. */
-export type SettingChoice =
-  "topics" | "fingerGuide" | "sound" | "volume" | "music";
+/** The buttons below the level grid, in order. */
+export type MenuChoice = "topics" | "settings";
 
 export function levelSelectScreen(
   levels: readonly Level[],
   best: (key: string) => LevelBest | undefined,
-  settings: Settings,
-): Screen & { settings: SettingChoice[] } {
+): Screen & { extras: MenuChoice[] } {
   const box = el("div", "box wide");
   box.dataset.testid = "screen-select";
   box.append(el("h1", "", t("select.title")));
@@ -73,10 +71,39 @@ export function levelSelectScreen(
     grid.append(card);
     return card;
   });
-  // Settings buttons come last, in a row below the grid.
-  const onOff = (on: boolean) => t(on ? "settings.on" : "settings.off");
-  const settingButtons: [SettingChoice, string][] = [
+  // Topics and settings: a row below the grid.
+  const extras: [MenuChoice, string][] = [
     ["topics", t("select.topics")],
+    ["settings", t("select.settings")],
+  ];
+  const row = el("div", "choices");
+  const buttons = extras.map(([id, label]) => {
+    const button = el("button", "choice menu-button", label);
+    button.dataset.testid = `menu-${id}`;
+    row.append(button);
+    return button;
+  });
+  box.append(grid, row, el("p", "hint", t("select.hint")));
+  return {
+    box,
+    choices: [...choices, ...buttons],
+    columns: 5,
+    extras: extras.map(([id]) => id),
+  };
+}
+
+/** The choices on the settings screen, top to bottom. */
+export type SettingChoice =
+  "fingerGuide" | "sound" | "volume" | "music" | "flyBys" | "reset" | "back";
+
+export function settingsScreen(
+  settings: Settings,
+): Screen & { order: SettingChoice[] } {
+  const box = el("div", "box");
+  box.dataset.testid = "screen-settings";
+  box.append(el("h1", "", t("settings.title")));
+  const onOff = (on: boolean) => t(on ? "settings.on" : "settings.off");
+  const items: [SettingChoice, string][] = [
     [
       "fingerGuide",
       t("settings.fingerGuide", { state: onOff(settings.fingerGuide) }),
@@ -87,25 +114,38 @@ export function levelSelectScreen(
       t("settings.volume", { percent: Math.round(settings.volume * 100) }),
     ],
     ["music", t("settings.music", { state: onOff(settings.music) })],
+    ["flyBys", t("settings.flyBys", { state: onOff(settings.flyBys) })],
+    ["reset", t("settings.reset")],
+    ["back", t("settings.back")],
   ];
-  const row = el("div", "choices");
-  const buttons = settingButtons.map(([id, label]) => {
+  const list = el("div", "settings-list");
+  const choices = items.map(([id, label]) => {
     const button = el(
       "button",
-      id === "topics" ? "choice topics-button" : "choice setting",
+      `choice setting${id === "reset" ? " danger" : ""}`,
       label,
     );
     button.dataset.testid = `setting-${id}`;
-    row.append(button);
+    list.append(button);
     return button;
   });
-  box.append(grid, row, el("p", "hint", t("select.hint")));
-  return {
-    box,
-    choices: [...choices, ...buttons],
-    columns: 5,
-    settings: settingButtons.map(([id]) => id),
-  };
+  box.append(list, el("p", "hint", t("settings.hint")));
+  return { box, choices, columns: 1, order: items.map(([id]) => id) };
+}
+
+/** "Are you sure?" before wiping all saved progress. Choice 0 = no, 1 = yes. */
+export function resetConfirmScreen(): Screen {
+  const box = el("div", "box narrow");
+  box.dataset.testid = "screen-reset";
+  box.append(el("h1", "", t("reset.title")), el("p", "", t("reset.text")));
+  const row = el("div", "choices");
+  const no = el("button", "choice", t("reset.no"));
+  no.dataset.testid = "reset-no";
+  const yes = el("button", "choice danger", t("reset.yes"));
+  yes.dataset.testid = "reset-yes";
+  row.append(no, yes);
+  box.append(row);
+  return { box, choices: [no, yes], columns: 2 };
 }
 
 export function introScreen(level: Level): Screen {
