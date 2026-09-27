@@ -15,9 +15,20 @@ export interface LevelBest {
 export interface Settings {
   /** Show the on-screen keyboard and hands. */
   fingerGuide: boolean;
+  /** Sound effects on. */
+  sound: boolean;
+  /** 0-1 */
+  volume: number;
+  /** Background music on (off by default). */
+  music: boolean;
 }
 
-const DEFAULT_SETTINGS: Settings = { fingerGuide: true };
+const DEFAULT_SETTINGS: Settings = {
+  fingerGuide: true,
+  sound: true,
+  volume: 0.5,
+  music: false,
+};
 
 export interface SaveData {
   version: typeof VERSION;
