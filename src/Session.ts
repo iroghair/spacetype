@@ -1,11 +1,17 @@
 import type { Sound } from "./audio/Sound";
 import { config } from "./config";
-import type { Content, Level } from "./content/types";
-import { buildRunText } from "./engine/levelRunner";
+import {
+  levelSource,
+  textCount,
+  topicSource,
+  type TextSource,
+} from "./content/TextSource";
+import type { Band, Content, Level, Topic } from "./content/types";
 import { confusedKeys, starsFor } from "./engine/scoring";
 import { TypingEngine } from "./engine/TypingEngine";
 import type { GameEvent } from "./engine/types";
 import type { PlayScene } from "./game/scenes/PlayScene";
+import { t } from "./i18n";
 import type { Direction } from "./input/classifyKey";
 import type { SaveStore, Settings } from "./storage/storage";
 import type { FingerGuide } from "./ui/FingerGuide";
@@ -13,18 +19,28 @@ import type { Fireworks } from "./ui/Fireworks";
 import type { Hud } from "./ui/Hud";
 import type { Overlay } from "./ui/Overlay";
 import {
+  bandSelectScreen,
   introScreen,
   levelSelectScreen,
+  resetConfirmScreen,
   resultsScreen,
+  settingsScreen,
+  topicIntroScreen,
+  topicSelectScreen,
+  type MenuChoice,
   type SettingChoice,
 } from "./ui/screens";
 import type { TextPanel } from "./ui/TextPanel";
 
 // What the game is doing right now:
-//   menu:      a screen (level select, intro, results) is up; arrows and Enter go to it
+//   menu:      a screen (menus, intro, results) is up; arrows and Enter go to it
 //   playing:   typed characters go to the engine
 //   finishing: the last letter is done; short pause before the results
 type Phase = "menu" | "playing" | "finishing";
+
+// What is being played: a level, or a topic at a difficulty band.
+type Run =
+  { kind: "level"; level: Level } | { kind: "topic"; topic: Topic; band: Band };
 
 declare global {
   interface Window {
@@ -39,7 +55,10 @@ declare global {
 export class Session {
   private phase: Phase = "menu";
   private engine?: TypingEngine;
-  private level?: Level;
+  private run?: Run;
+  private source?: TextSource;
+  /** Where Escape goes from the current screen (nothing on the level menu). */
+  private back?: () => void;
 
   constructor(
     private readonly content: Content,
@@ -70,9 +89,7 @@ export class Session {
   }
 
   onEscape(): void {
-    // From a run or the intro, Escape goes back to the level list.
-    if (this.phase !== "finishing" && this.level)
-      this.showLevelSelect(this.level);
+    if (this.phase !== "finishing") this.back?.();
   }
 
   /** Called every frame. Keeps running after completion so wrong letters still burn. */
@@ -82,33 +99,95 @@ export class Session {
     this.refreshHud(timeMs);
   }
 
-  /** `focus` is a level, or one of the settings buttons below the grid. */
-  private showLevelSelect(focus: Level | SettingChoice): void {
+  // ---------- Menus ----------
+
+  /** `focus` is a level, or one of the buttons below the grid. */
+  private showLevelSelect(focus: Level | MenuChoice): void {
     this.stopRun();
+    this.back = undefined;
     const levels = this.content.levels;
-    const screen = levelSelectScreen(
-      levels,
-      (id) => this.saves.best(id),
-      this.saves.settings,
-    );
+    const screen = levelSelectScreen(levels, (key) => this.saves.best(key));
     this.overlay.show(
       screen,
       (i) => {
-        if (i < levels.length) {
-          this.showIntro(levels[i]);
-        } else {
-          const setting = screen.settings[i - levels.length];
-          this.changeSetting(setting);
-          this.showLevelSelect(setting);
-        }
+        if (i < levels.length)
+          return this.showIntro({ kind: "level", level: levels[i] });
+        if (screen.extras[i - levels.length] === "topics")
+          this.showTopicSelect();
+        else this.showSettings();
       },
       typeof focus === "string"
-        ? levels.length + screen.settings.indexOf(focus)
+        ? levels.length + screen.extras.indexOf(focus)
         : levels.indexOf(focus),
     );
   }
 
-  private changeSetting(setting: SettingChoice): void {
+  private showSettings(focus: SettingChoice = "fingerGuide"): void {
+    this.stopRun();
+    this.back = () => this.showLevelSelect("settings");
+    const screen = settingsScreen(this.saves.settings);
+    this.overlay.show(
+      screen,
+      (i) => {
+        const choice = screen.order[i];
+        if (choice === "back") return this.showLevelSelect("settings");
+        if (choice === "reset") return this.showResetConfirm();
+        this.changeSetting(choice);
+        this.showSettings(choice);
+      },
+      screen.order.indexOf(focus),
+    );
+  }
+
+  private showResetConfirm(): void {
+    this.back = () => this.showSettings("reset");
+    this.overlay.show(
+      resetConfirmScreen(),
+      (i) => {
+        if (i === 1) {
+          this.saves.reset();
+          this.applySettings(this.saves.settings);
+        }
+        this.showSettings("reset");
+      },
+      0, // "No" is highlighted, so a quick Enter doesn't wipe anything
+    );
+  }
+
+  private showTopicSelect(focus?: Topic): void {
+    this.stopRun();
+    this.back = () => this.showLevelSelect("topics");
+    const topics = this.content.topics.topics;
+    this.overlay.show(
+      topicSelectScreen(topics),
+      (i) => {
+        if (topics[i].texts.length > 0) this.showBandSelect(topics[i]);
+      },
+      focus ? topics.indexOf(focus) : 0,
+    );
+  }
+
+  private showBandSelect(topic: Topic, focus?: Band): void {
+    this.stopRun();
+    this.back = () => this.showTopicSelect(topic);
+    const bands = this.content.topics.bands;
+    const best = (band: Band) =>
+      this.saves.best(topicSource(topic, band, config.runner).id);
+    // Start on the first band that has texts.
+    const first = bands.findIndex((b) => textCount(topic, b) > 0);
+    this.overlay.show(
+      bandSelectScreen(topic, bands, best),
+      (i) => {
+        if (textCount(topic, bands[i]) > 0)
+          this.showIntro({ kind: "topic", topic, band: bands[i] });
+      },
+      focus ? bands.indexOf(focus) : first,
+    );
+  }
+
+  private changeSetting(
+    setting: Exclude<SettingChoice, "reset" | "back">,
+  ): void {
     const current = this.saves.settings;
     if (setting === "volume") {
       // Cycle to the next volume step (after the loudest, back to the quietest).
@@ -127,21 +206,49 @@ export class Session {
     this.sound.setEnabled(settings.sound);
     this.sound.setVolume(settings.volume);
     this.sound.setMusic(settings.music);
+    this.scene.setFlyBys(settings.flyBys);
   }
 
-  private showIntro(level: Level): void {
-    this.phase = "menu";
-    this.level = level;
-    this.overlay.show(introScreen(level), () => this.start(level));
+  // ---------- Running a level or topic ----------
+
+  /** The list a run belongs to, to return to afterwards. */
+  private backToList(run: Run): void {
+    if (run.kind === "level") this.showLevelSelect(run.level);
+    else this.showBandSelect(run.topic, run.band);
   }
 
-  private start(level: Level): void {
-    const text = buildRunText(level, this.content, Math.random, config.runner);
+  private sourceFor(run: Run): TextSource {
+    if (run.kind === "topic")
+      return topicSource(run.topic, run.band, config.runner);
+    return levelSource(
+      run.level,
+      this.content,
+      t("hud.level", { id: run.level.id }),
+      config.runner,
+    );
+  }
+
+  private showIntro(run: Run): void {
+    this.stopRun();
+    this.run = run;
+    this.back = () => this.backToList(run);
+    const screen =
+      run.kind === "level"
+        ? introScreen(run.level)
+        : topicIntroScreen(run.topic, run.band);
+    this.overlay.show(screen, () => this.start(run));
+  }
+
+  private start(run: Run): void {
+    const source = this.sourceFor(run);
+    const text = source.nextText(Math.random);
     if (import.meta.env.DEV) window.__spacetype = { text };
-    this.level = level;
+    this.run = run;
+    this.source = source;
+    this.back = () => this.backToList(run);
     this.engine = new TypingEngine(text, {
       ...config.stream,
-      targetSpm: level.targetSpm,
+      targetSpm: source.targetSpm,
       pointsPerStroke: config.scoring.pointsPerStroke,
       comboTiers: config.scoring.comboTiers,
       flawlessWordBonus: config.scoring.flawlessWordBonus,
@@ -189,15 +296,16 @@ export class Session {
   }
 
   private showResults(engine: TypingEngine): void {
-    const level = this.level!;
+    const run = this.run!;
+    const source = this.source!;
     const stats = engine.stats();
     const stars = starsFor(
       stats.accuracy,
       stats.spm,
-      level.targetSpm,
+      source.targetSpm,
       config.scoring.stars,
     );
-    const previous = this.saves.record(level.id, {
+    const previous = this.saves.record(source.id, {
       score: stats.score,
       spm: stats.spm,
       accuracy: stats.accuracy,
@@ -208,25 +316,30 @@ export class Session {
       previous !== undefined &&
       (stats.score > previous.score || stats.spm > previous.spm);
 
+    // Only levels have a "next" one; topics go back to their difficulty list.
     const levels = this.content.levels;
-    const next = levels[levels.indexOf(level) + 1];
+    const next =
+      run.kind === "level" ? levels[levels.indexOf(run.level) + 1] : undefined;
     const screen = resultsScreen({
-      level,
       stats,
       stars,
       newRecord,
       confused: confusedKeys(engine.chars),
       hasNext: next !== undefined,
+      backLabel: t(run.kind === "level" ? "results.levels" : "select.topics"),
     });
     this.phase = "menu";
+    this.back = () => this.backToList(run);
     this.celebrate(stars, newRecord);
     this.overlay.show(
       screen,
       (i) => {
         const choice = screen.order[i];
-        if (choice === "again") this.showIntro(level);
-        else if (choice === "next" && next) this.showIntro(next);
-        else this.showLevelSelect(next ?? level);
+        if (choice === "again") this.showIntro(run);
+        else if (choice === "next" && next)
+          this.showIntro({ kind: "level", level: next });
+        else if (run.kind === "level") this.showLevelSelect(next ?? run.level);
+        else this.showBandSelect(run.topic, run.band);
       },
       screen.order.indexOf(next ? "next" : "again"),
     );
@@ -254,8 +367,9 @@ export class Session {
 
   private refreshHud(timeMs: number): void {
     const engine = this.engine!;
+    const source = this.source!;
     this.hud.update({
-      levelId: this.level!.id,
+      label: source.label,
       score: engine.score,
       combo: engine.combo,
       multiplier: engine.multiplier,
@@ -264,7 +378,7 @@ export class Session {
         config.scoring.spmWindowMs,
         config.scoring.spmMinWindowMs,
       ),
-      targetSpm: this.level!.targetSpm,
+      targetSpm: source.targetSpm,
       accuracy: engine.accuracy,
       turbo: engine.turbo ? config.scoring.turbo.multiplier : undefined,
     });

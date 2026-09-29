@@ -39,8 +39,37 @@ export interface Entry {
   difficulty: number;
 }
 
+/** A difficulty band for topic texts (content/nl/topics/topics.json). */
+export interface Band {
+  id: number;
+  name: string;
+  /** Texts up to this many characters belong to this band. */
+  maxLength: number;
+  targetSpm: number;
+  runLength: number;
+}
+
+export interface TopicText {
+  text: string;
+  band: number;
+  difficulty: number;
+}
+
+export interface Topic {
+  id: string;
+  name: string;
+  /** Only approved texts (from <topic>.txt, never *.pending.txt). */
+  texts: TopicText[];
+}
+
+export interface Topics {
+  bands: Band[];
+  topics: Topic[];
+}
+
 export interface Content {
   levels: Level[];
   words: Entry[];
   sentences: Entry[];
+  topics: Topics;
 }

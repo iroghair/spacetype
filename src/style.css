@@ -310,6 +310,10 @@ body {
   font-size: 24px;
 }
 
+#overlay .box.narrow {
+  max-width: 640px;
+}
+
 #overlay h1 {
   margin: 0 0 16px;
   font-size: 44px;
@@ -462,6 +466,43 @@ ul.confused {
 .choice {
   padding: 10px 24px;
   font-weight: 700 !important;
+}
+
+/* Topics and settings buttons below the level grid. */
+#overlay .choice.menu-button {
+  min-width: 200px;
+  border-color: var(--color-arrow);
+  color: var(--color-arrow);
+}
+
+/* The settings screen: one button per line. */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px auto 0;
+  width: 380px;
+}
+
+#overlay .choice.danger {
+  border-color: var(--color-wrong);
+  color: var(--color-wrong);
+}
+
+.topic-card {
+  padding: 22px 6px !important;
+  font-size: 22px !important;
+}
+
+.choices.bands .choice {
+  min-width: 180px;
+  line-height: 1.4;
+}
+
+/* Topics or bands without texts yet. */
+#overlay button.disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 @keyframes blink {

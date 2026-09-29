@@ -1,5 +1,6 @@
 import { config } from "../config";
-import type { Level } from "../content/types";
+import { textCount } from "../content/TextSource";
+import type { Band, Level, Topic } from "../content/types";
 import type { ConfusedKey } from "../engine/scoring";
 import type { RunStats } from "../engine/types";
 import { t } from "../i18n";
@@ -41,14 +42,13 @@ export function formatKeys(keys: string): string {
     .join(" ");
 }
 
-/** The settings buttons on the level select screen, in order. */
-export type SettingChoice = "fingerGuide" | "sound" | "volume" | "music";
+/** The buttons below the level grid, in order. */
+export type MenuChoice = "topics" | "settings";
 
 export function levelSelectScreen(
   levels: readonly Level[],
-  best: (id: number) => LevelBest | undefined,
-  settings: Settings,
-): Screen & { settings: SettingChoice[] } {
+  best: (key: string) => LevelBest | undefined,
+): Screen & { extras: MenuChoice[] } {
   const box = el("div", "box wide");
   box.dataset.testid = "screen-select";
   box.append(el("h1", "", t("select.title")));
@@ -56,7 +56,7 @@ export function levelSelectScreen(
   const choices = levels.map((level) => {
     const card = el("button", "level-card");
     card.dataset.testid = `level-${level.id}`;
-    const record = best(level.id);
+    const record = best(String(level.id));
     card.append(
       el("div", "level-number", t("select.level", { id: level.id })),
       el("div", "level-name", level.name),
@@ -71,9 +71,39 @@ export function levelSelectScreen(
     grid.append(card);
     return card;
   });
-  // Settings buttons come last, in a row below the grid.
+  // Topics and settings: a row below the grid.
+  const extras: [MenuChoice, string][] = [
+    ["topics", t("select.topics")],
+    ["settings", t("select.settings")],
+  ];
+  const row = el("div", "choices");
+  const buttons = extras.map(([id, label]) => {
+    const button = el("button", "choice menu-button", label);
+    button.dataset.testid = `menu-${id}`;
+    row.append(button);
+    return button;
+  });
+  box.append(grid, row, el("p", "hint", t("select.hint")));
+  return {
+    box,
+    choices: [...choices, ...buttons],
+    columns: 5,
+    extras: extras.map(([id]) => id),
+  };
+}
+
+/** The choices on the settings screen, top to bottom. */
+export type SettingChoice =
+  "fingerGuide" | "sound" | "volume" | "music" | "flyBys" | "reset" | "back";
+
+export function settingsScreen(
+  settings: Settings,
+): Screen & { order: SettingChoice[] } {
+  const box = el("div", "box");
+  box.dataset.testid = "screen-settings";
+  box.append(el("h1", "", t("settings.title")));
   const onOff = (on: boolean) => t(on ? "settings.on" : "settings.off");
-  const settingButtons: [SettingChoice, string][] = [
+  const items: [SettingChoice, string][] = [
     [
       "fingerGuide",
       t("settings.fingerGuide", { state: onOff(settings.fingerGuide) }),
@@ -84,21 +114,38 @@ export function levelSelectScreen(
       t("settings.volume", { percent: Math.round(settings.volume * 100) }),
     ],
     ["music", t("settings.music", { state: onOff(settings.music) })],
+    ["flyBys", t("settings.flyBys", { state: onOff(settings.flyBys) })],
+    ["reset", t("settings.reset")],
+    ["back", t("settings.back")],
   ];
-  const row = el("div", "choices");
-  const buttons = settingButtons.map(([id, label]) => {
-    const button = el("button", "choice setting", label);
+  const list = el("div", "settings-list");
+  const choices = items.map(([id, label]) => {
+    const button = el(
+      "button",
+      `choice setting${id === "reset" ? " danger" : ""}`,
+      label,
+    );
     button.dataset.testid = `setting-${id}`;
-    row.append(button);
+    list.append(button);
     return button;
   });
-  box.append(grid, row, el("p", "hint", t("select.hint")));
-  return {
-    box,
-    choices: [...choices, ...buttons],
-    columns: 5,
-    settings: settingButtons.map(([id]) => id),
-  };
+  box.append(list, el("p", "hint", t("settings.hint")));
+  return { box, choices, columns: 1, order: items.map(([id]) => id) };
+}
+
+/** "Are you sure?" before wiping all saved progress. Choice 0 = no, 1 = yes. */
+export function resetConfirmScreen(): Screen {
+  const box = el("div", "box narrow");
+  box.dataset.testid = "screen-reset";
+  box.append(el("h1", "", t("reset.title")), el("p", "", t("reset.text")));
+  const row = el("div", "choices");
+  const no = el("button", "choice", t("reset.no"));
+  no.dataset.testid = "reset-no";
+  const yes = el("button", "choice danger", t("reset.yes"));
+  yes.dataset.testid = "reset-yes";
+  row.append(no, yes);
+  box.append(row);
+  return { box, choices: [no, yes], columns: 2 };
 }
 
 export function introScreen(level: Level): Screen {
@@ -121,13 +168,77 @@ export function introScreen(level: Level): Screen {
   return { box, choices: [start], columns: 1 };
 }
 
+export function topicSelectScreen(topics: readonly Topic[]): Screen {
+  const box = el("div", "box wide");
+  box.dataset.testid = "screen-topics";
+  box.append(el("h1", "", t("topics.title")));
+  const grid = el("div", "level-grid");
+  const choices = topics.map((topic) => {
+    const card = el("button", "level-card topic-card");
+    card.dataset.testid = `topic-${topic.id}`;
+    const count = topic.texts.length;
+    // A topic without approved texts can't be played yet.
+    if (count === 0) card.classList.add("disabled");
+    card.append(
+      el("div", "level-name", topic.name),
+      el(
+        "div",
+        "level-target",
+        count > 0 ? t("topics.count", { count }) : t("topics.empty"),
+      ),
+    );
+    grid.append(card);
+    return card;
+  });
+  box.append(grid, el("p", "hint", t("topics.hint")));
+  return { box, choices, columns: 5 };
+}
+
+export function bandSelectScreen(
+  topic: Topic,
+  bands: readonly Band[],
+  best: (band: Band) => LevelBest | undefined,
+): Screen {
+  const box = el("div", "box");
+  box.dataset.testid = "screen-bands";
+  box.append(el("h1", "", t("bands.title", { topic: topic.name })));
+  const row = el("div", "choices bands");
+  const choices = bands.map((band) => {
+    const button = el("button", "choice band");
+    button.dataset.testid = `band-${band.id}`;
+    if (textCount(topic, band) === 0) button.classList.add("disabled");
+    button.append(
+      el("div", "", band.name),
+      el("div", "level-target", t("select.target", { spm: band.targetSpm })),
+      el("div", "stars", starsText(best(band)?.stars ?? 0)),
+    );
+    row.append(button);
+    return button;
+  });
+  box.append(row, el("p", "hint", t("topics.hint")));
+  return { box, choices, columns: bands.length };
+}
+
+export function topicIntroScreen(topic: Topic, band: Band): Screen {
+  const box = el("div", "box");
+  box.dataset.testid = "screen-intro";
+  box.append(
+    el("h1", "", t("topicIntro.title", { topic: topic.name, band: band.name })),
+  );
+  box.append(el("p", "", t("intro.target", { spm: band.targetSpm })));
+  const start = el("button", "prompt", t("intro.start"));
+  box.append(start, el("p", "hint", t("topicIntro.back")));
+  return { box, choices: [start], columns: 1 };
+}
+
 export interface ResultsInfo {
-  level: Level;
   stats: RunStats;
   stars: number;
   newRecord: boolean;
   confused: ConfusedKey[];
   hasNext: boolean;
+  /** Label of the "back to the list" button ("Levels" or "Onderwerpen"). */
+  backLabel: string;
 }
 
 /** Choices on the results screen, in order. */
@@ -196,7 +307,8 @@ export function resultsScreen(
     : ["again", "levels"];
   const row = el("div", "choices");
   const choices = order.map((choice) => {
-    const button = el("button", "choice", t(`results.${choice}`));
+    const label = choice === "levels" ? info.backLabel : t(`results.${choice}`);
+    const button = el("button", "choice", label);
     button.dataset.testid = `choice-${choice}`;
     row.append(button);
     return button;

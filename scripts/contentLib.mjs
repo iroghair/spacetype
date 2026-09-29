@@ -187,3 +187,111 @@ export function buildEntries(lines, kind, levels) {
   );
   return { entries, problems };
 }
+
+// ---------- Topic texts (content/nl/topics/) ----------
+
+/**
+ * @typedef {{ id: number, name: string, maxLength: number, targetSpm: number, runLength: number }} Band
+ * @typedef {{ id: string, name: string, about: string }} TopicDef
+ * @typedef {{ bands: Band[], topics: TopicDef[] }} TopicsConfig
+ * @typedef {{ text: string, band: number, difficulty: number }} TopicText
+ */
+
+/**
+ * Check content/nl/topics/topics.json. Returns a list of problems (empty when fine).
+ * @param {any} data
+ * @returns {string[]}
+ */
+export function validateTopicsConfig(data) {
+  /** @type {string[]} */
+  const problems = [];
+  if (!Array.isArray(data?.bands) || data.bands.length === 0)
+    problems.push("topics.json: needs a list of bands");
+  if (!Array.isArray(data?.topics) || data.topics.length === 0)
+    problems.push("topics.json: needs a list of topics");
+  if (problems.length > 0) return problems;
+  let previousMax = 0;
+  data.bands.forEach((/** @type {any} */ band, /** @type {number} */ i) => {
+    if (band.id !== i + 1)
+      problems.push(`band ${i + 1}: id should be ${i + 1}`);
+    for (const field of ["maxLength", "targetSpm", "runLength"]) {
+      if (!(band[field] > 0))
+        problems.push(`band ${i + 1}: ${field} must be a positive number`);
+    }
+    if (band.maxLength <= previousMax)
+      problems.push(
+        `band ${i + 1}: maxLength must be larger than the band before`,
+      );
+    previousMax = band.maxLength;
+  });
+  for (const topic of data.topics) {
+    if (!/^[a-z]+$/.test(topic.id ?? ""))
+      problems.push(
+        `topic "${topic.id}": id must be lowercase letters (it is the file name)`,
+      );
+    if (!topic.name) problems.push(`topic "${topic.id}": missing name`);
+    if (!topic.about)
+      problems.push(
+        `topic "${topic.id}": missing "about" (used when generating texts)`,
+      );
+  }
+  return problems;
+}
+
+/**
+ * The band of a text: the first band whose maxLength fits it, or undefined if it's too long.
+ * @param {string} text
+ * @param {Band[]} bands
+ */
+export function bandFor(text, bands) {
+  return bands.find((b) => text.length <= b.maxLength)?.id;
+}
+
+/**
+ * Validate the approved lines of one topic file and give each a band.
+ * Uses the same character rules as sentences.txt.
+ * @param {{ line: number, text: string }[]} lines
+ * @param {Band[]} bands
+ * @returns {{ texts: TopicText[], problems: Problem[] }}
+ */
+export function buildTopicTexts(lines, bands) {
+  /** @type {Problem[]} */
+  const problems = [];
+  /** @type {Map<string, number>} */
+  const seen = new Map();
+  /** @type {TopicText[]} */
+  const texts = [];
+  for (const { line, text } of lines) {
+    if (!SENTENCE_PATTERN.test(text)) {
+      problems.push({
+        line,
+        message: `"${text}": only letters, spaces and , . ? ! : - allowed`,
+      });
+      continue;
+    }
+    if (text.includes("  ")) {
+      problems.push({ line, message: `"${text}": double space` });
+      continue;
+    }
+    const earlier = seen.get(text.toLowerCase());
+    if (earlier !== undefined) {
+      problems.push({
+        line,
+        message: `"${text}": duplicate of line ${earlier}`,
+      });
+      continue;
+    }
+    seen.set(text.toLowerCase(), line);
+    const band = bandFor(text, bands);
+    if (band === undefined) {
+      problems.push({
+        line,
+        message: `"${text}": too long (max ${bands[bands.length - 1].maxLength} characters)`,
+      });
+      continue;
+    }
+    texts.push({ text, band, difficulty: difficulty(text) });
+  }
+  texts.sort((a, b) => a.band - b.band || a.difficulty - b.difficulty);
+  return { texts, problems };
+}

@@ -233,10 +233,10 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 
 ### Phase 6 — Topic texts
 
-- [ ] `scripts/generate_topic_texts.py`: a Python script the owner runs locally. The API key is read from `.env`, which is git-ignored. It generates texts for the topics _vissen, muziek, Minecraft, sport, strips_ at several difficulty bands, with these constraints: ages 9–13, Dutch, no diacritics or apostrophes, kid-safe, original text.
-- [ ] Output goes to `content/nl/topics/<topic>.pending.txt`. The owner reviews it and moves approved lines to `<topic>.txt`; only approved files are built.
-- [ ] Topic picker (5 options) → a topic run at the chosen difficulty
-- [ ] `TextSource` interface, so a live generator can be added later
+- [x] `scripts/generate_topic_texts.py`: a Python script the owner runs locally. The API key is read from `.env`, which is git-ignored. It generates texts for the topics _vissen, muziek, Minecraft, sport, strips_ at several difficulty bands, with these constraints: ages 9–13, Dutch, no diacritics or apostrophes, kid-safe, original text.
+- [x] Output goes to `content/nl/topics/<topic>.pending.txt`. The owner reviews it and moves approved lines to `<topic>.txt`; only approved files are built.
+- [x] Topic picker (5 options) → a topic run at the chosen difficulty
+- [x] `TextSource` interface, so a live generator can be added later
 
 **Done when:** kids can pick a topic and type reviewed texts about it.
 
@@ -262,3 +262,6 @@ The owner does this first: create a **public** GitHub repo named `spacetype`, th
 - **Laser look:** full screen height, sine wave with 12 periods, peaks moving down, amplitude swinging +1 → -1 over 4 s (`laser` in `src/config.ts`). Its glow changes colour with each combo tier.
 - **Turbo:** live SPM ≥ 120% of target for 10 s doubles points until the pace drops (`scoring.turbo`).
 - **Sounds and sprites** are made in code (no files), so there is nothing to license. Music is off by default.
+- **Topic difficulty bands** follow from text length (`content/nl/topics/topics.json`): Makkelijk ≤ 45 characters (60 SPM), Gemiddeld ≤ 90 (75 SPM), Moeilijk ≤ 160 (90 SPM). The generator asks for texts of the right length per band; the pipeline sorts approved texts into bands by length.
+- **Topic generator model:** Claude Opus 5 (`claude-opus-5`) with structured output, and `fallbacks: "default"` so a declined request is retried on a fallback model.
+- **Settings screen:** the level menu has "Onderwerpen" and "Instellingen". Settings: finger guide, sound, volume, music, fly-bys (rockets/UFOs/astronauts, on by default) and "Voortgang wissen", which asks for confirmation and then erases all records and settings on the device.

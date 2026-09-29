@@ -28,6 +28,8 @@ export class PlayScene extends Phaser.Scene {
   private bursts!: Bursts;
   private celebrations!: Celebrations;
   private turbo = false;
+  /** Rockets/UFOs/astronauts flying past (a setting; some players find them distracting). */
+  private flyBys = true;
   private markReady!: () => void;
   /** Resolves once create() has run and the scene can draw a run. */
   readonly ready = new Promise<void>((resolve) => (this.markReady = resolve));
@@ -112,10 +114,14 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
+  setFlyBys(on: boolean): void {
+    this.flyBys = on;
+  }
+
   /** A new personal record: the mascot cheers and something flies by. */
   celebrateRecord(): void {
     this.celebrations.mascotSays(t("celebrate.mascotRecord"));
-    this.celebrations.flyBy();
+    if (this.flyBys) this.celebrations.flyBy();
   }
 
   update(time: number, deltaMs: number): void {
@@ -135,7 +141,7 @@ export class PlayScene extends Phaser.Scene {
     this.celebrations.popup(t(message), color);
     this.laser.setColor(color);
     this.starfield.boostOnce();
-    this.celebrations.flyBy();
+    if (this.flyBys) this.celebrations.flyBy();
     if (tier >= 2) this.celebrations.mascotSays(t(message));
   }
 

@@ -21,6 +21,8 @@ export interface Settings {
   volume: number;
   /** Background music on (off by default). */
   music: boolean;
+  /** Rockets, UFOs and astronauts flying past at combo tier-ups. */
+  flyBys: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -28,6 +30,7 @@ const DEFAULT_SETTINGS: Settings = {
   sound: true,
   volume: 0.5,
   music: false,
+  flyBys: true,
 };
 
 export interface SaveData {
@@ -60,8 +63,15 @@ export class SaveStore {
     this.save();
   }
 
-  best(levelId: number): LevelBest | undefined {
-    return this.data.bests[levelId];
+  /** Forget everything saved on this device: all records and settings. */
+  reset(): void {
+    this.data = empty();
+    this.save();
+  }
+
+  /** Best result for a level ("3") or topic run ("topic-vissen-2"). */
+  best(key: string): LevelBest | undefined {
+    return this.data.bests[key];
   }
 
   /**
@@ -69,9 +79,9 @@ export class SaveStore {
    * run can set the SPM record while an earlier run keeps the accuracy record.
    * Returns the previous best (undefined on the first run of this level).
    */
-  record(levelId: number, run: LevelBest): LevelBest | undefined {
-    const previous = this.data.bests[levelId];
-    this.data.bests[levelId] = previous
+  record(key: string, run: LevelBest): LevelBest | undefined {
+    const previous = this.data.bests[key];
+    this.data.bests[key] = previous
       ? {
           score: Math.max(previous.score, run.score),
           spm: Math.max(previous.spm, run.spm),

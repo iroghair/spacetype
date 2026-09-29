@@ -1,0 +1,52 @@
+{
+  "bands": [
+    {
+      "id": 1,
+      "name": "Makkelijk",
+      "maxLength": 45,
+      "targetSpm": 60,
+      "runLength": 150
+    },
+    {
+      "id": 2,
+      "name": "Gemiddeld",
+      "maxLength": 90,
+      "targetSpm": 75,
+      "runLength": 200
+    },
+    {
+      "id": 3,
+      "name": "Moeilijk",
+      "maxLength": 160,
+      "targetSpm": 90,
+      "runLength": 250
+    }
+  ],
+  "topics": [
+    {
+      "id": "vissen",
+      "name": "Vissen",
+      "about": "vissen, het leven onder water, aquaria en hengelen"
+    },
+    {
+      "id": "muziek",
+      "name": "Muziek",
+      "about": "muziek maken, instrumenten, zingen en concerten"
+    },
+    {
+      "id": "minecraft",
+      "name": "Minecraft",
+      "about": "het spel Minecraft: bouwen, grotten verkennen, overleven en samen spelen"
+    },
+    {
+      "id": "sport",
+      "name": "Sport",
+      "about": "sporten zoals voetbal, hockey, zwemmen, judo en turnen, en trainen"
+    },
+    {
+      "id": "strips",
+      "name": "Strips",
+      "about": "stripverhalen lezen en zelf strips tekenen"
+    }
+  ]
+}
